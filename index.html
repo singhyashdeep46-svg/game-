@@ -125,6 +125,12 @@ body.hasguide .toast{bottom:calc(272px + env(safe-area-inset-bottom,0px))}
 .ordb{display:flex;gap:6px}
 @media(prefers-reduced-motion:reduce){.drop,.plot[data-s=ready],.plot[data-s=growing] .psv,.field.wx-rain:after{animation:none}}
 
+
+@media(max-width:759px){
+  .tabs .wrap[role=tablist]{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;overflow:visible;padding-left:4px;padding-right:4px}
+  .tabs .tab{flex-direction:column;justify-content:center;gap:2px;padding:8px 0 6px;font-size:10.5px;min-height:54px;position:relative;text-align:center;line-height:1.1;white-space:normal}
+  .tabs .tab .dot{position:absolute;top:4px;right:6px;margin:0;min-width:16px;font-size:10px;line-height:16px}
+}
 /* header band */
 .band{background:hsl(var(--sh) 36% 19%);color:#EEF2E8;padding-block:18px 18px;transition:background .6s}
 .band-grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
@@ -1145,7 +1151,7 @@ function renderFarms(){
   }).join('');
   const plots=f.plots.map((pl,i)=>{
     const sel=S.ui.plot&&S.ui.plot.f===f.id&&S.ui.plot.i===i;
-    if(pl.s===0)return'<button class="plot" data-s="0" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', wild ground. Plough by hand">'+plotSVG(pl)+'</button>';
+    if(pl.s===0)return'<button class="plot" data-s="0" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', wild ground. Plough by hand">'+plotSVG(pl)+'<span class="pl">Plough</span></button>';
     if(pl.s===1)return'<button class="plot" data-s="1" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', ploughed. Sow '+CROPS[S.ui.crop].name+' by hand">'+plotSVG(pl)+'<span class="pl">Sow</span></button>';
     const ready=pl.p>=pl.need,pct=Math.round(pl.p/pl.need*100),left=Math.max(0,Math.ceil((pl.need-pl.p)/growSpeed(f)));
     return'<button class="plot'+(sel?' picked':'')+'" data-s="'+(ready?'ready':'growing')+'" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', '+CROPS[pl.crop].name+', '+(ready?'ready to harvest':left+' weeks left')+'">'+plotSVG(pl)+'<span class="pl">'+(ready?'Harvest':left+' wk')+'</span><span class="pb"><i style="width:'+pct+'%"></i></span></button>';
@@ -1187,7 +1193,7 @@ function renderFarms(){
     '<div class="farm-head"><h2>'+esc(f.name)+'</h2><div class="farm-meta">'+f.plots.length+' plots · '+st.wild+' wild · '+st.plowed+' ploughed · '+st.growing+' growing · '+st.ready+' ready</div><div class="row">'+tags+'</div></div>'+
     '<div class="label">Field work</div>'+hand+'<div class="jobs">'+jobs+'</div>'+
     '<div class="label">Crop to sow</div><div class="chips">'+chips+'</div>'+
-    '<div class="label">Plots · tap a plot to work it by hand</div><div class="legend"><span>🟩 Wild</span><span>🟫 Ploughed</span><span>🌱 Growing</span><span class="rp">✨ Ripe: harvest it</span></div><div class="field wx-'+((S.wx&&S.wx.now)||'sun')+'"><div class="plots">'+plots+'</div>'+drive+'</div>'+pinfo+mach+crewCard(f)+animalCard(f)+
+    '<div class="label">Plots · tap a green plot to plough it, a brown plot to sow it</div><div class="legend"><span>🟩 Wild</span><span>🟫 Ploughed</span><span>🌱 Growing</span><span class="rp">✨ Ripe: harvest it</span></div><div class="field wx-'+((S.wx&&S.wx.now)||'sun')+'"><div class="plots">'+plots+'</div>'+drive+'</div>'+pinfo+mach+crewCard(f)+animalCard(f)+
     '<div class="label">Improvements</div><div class="card"><ul class="list">'+upg+
     '<li><div><b>Add 4 plots</b><p>Expands this farm to '+(f.plots.length+4)+' plots. New plots start as wild ground.</p></div><button class="btn sm" data-a="upg" data-id="'+f.id+'" data-k="expand"'+(S.cash<expCost||f.plots.length>=40?' disabled':'')+'>'+(f.plots.length>=40?'Maximum size':'Expand '+money(expCost))+'</button></li>'+
     '<li><div><b>Farm manager</b><p>Each week harvests, ploughs, sows the best crop for the season and sprays, using your deployed machines plus '+MGR_HAND+' plots of hand work. Wage '+money(mgrWage(f))+' a week.</p></div><button class="btn sm'+(f.manager?'':' primary')+'" data-a="mgr" data-id="'+f.id+'">'+(f.manager?'Dismiss':'Hire')+'</button></li>'+
@@ -1333,10 +1339,10 @@ function guideStep(){
   if(qj){
     const J=JOBS[qj],n=jobIdx(f,qj).length,m=farmHas(f,J.veh);
     if(!m&&f.hand<=0&&n>0)return{k:'hand',msg:'You are out of hand work for this week. Tap Next week to get it back. Then we will '+J.name.toLowerCase()+'.',sel:'#dock [data-a=next]'};
-    if(qj==='plough')return{k:'plough',msg:'Plough turns wild ground into soil so seeds can grow. Tap the glowing Plough button. By hand you can do '+plural(f.hand,'plot')+' this week.',sel:'.jobs [data-job=plough]:not([disabled])'};
+    if(qj==='plough')return{k:'plough',msg:'Plough turns wild ground into soil so seeds can grow. Tap a glowing green plot to plough that one, or tap Plough to do several. You can do '+plural(f.hand,'plot')+' by hand this week.',sel:'.jobs [data-job=plough]:not([disabled])',sel2:'.plot[data-s="0"]'};
     if(qj==='sow'){
       if(S.cash<seedCost(S.ui.crop,f))return{k:'cheap',msg:'Not enough cash for that seed. Pick a cheaper crop from the list.',sel:'.chip'};
-      return{k:'sow',msg:'Soil is ready! Choose a crop in the list, then tap the glowing Sow button to plant it.',sel:'.jobs [data-job=sow]:not([disabled])'};
+      return{k:'sow',msg:'Soil is ready! Choose a crop in the list, then tap a glowing brown plot to plant it, or tap Sow for several.',sel:'.jobs [data-job=sow]:not([disabled])',sel2:'.plot[data-s="1"]'};
     }
     return{k:'harvest',msg:'Your crops are ripe! Tap Harvest to collect them.',sel:'.jobs [data-job=harvest]:not([disabled])'};
   }
@@ -1358,6 +1364,7 @@ function renderGuide(){
   g.innerHTML='<button type="button" class="gm" data-a="guide" aria-label="'+(UI.guideOff?'Show Sprout the guide':'Hide Sprout the guide')+'">'+SPROUT+'</button>'+
     (UI.guideOff?'':'<div class="gb" role="status"><b>Sprout</b>'+path+'<p>'+st.msg+'</p><button type="button" class="gx" data-a="guide">Hide tips</button></div>');
   if(UI.guideOff)return;
+  if(st.sel2)document.querySelectorAll(st.sel2).forEach(e=>e.classList.add('gl'));
   const el=document.querySelector(st.sel);
   if(el){
     el.classList.add('gl');
