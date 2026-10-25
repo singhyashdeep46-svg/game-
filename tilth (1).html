@@ -1,0 +1,1571 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* Photo-rich farm showcase and clearer interaction affordances */
+.photo-showcase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.photo-tile{position:relative;min-height:160px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface2);isolation:isolate}
+.photo-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .45s ease,filter .3s ease}
+.photo-tile:after{content:"";position:absolute;inset:25% 0 0;background:linear-gradient(transparent,rgba(8,24,14,.88));z-index:-0;pointer-events:none}
+.photo-tile:hover img{transform:scale(1.055);filter:saturate(1.1)}
+.photo-tile .photo-copy{position:absolute;left:14px;right:14px;bottom:13px;color:#fff;z-index:1;text-shadow:0 1px 5px #0008}
+.photo-copy small{display:block;font:500 10px var(--f-mono);letter-spacing:.13em;text-transform:uppercase;opacity:.82}
+.photo-copy b{display:block;font:700 20px/1.1 var(--f-display);margin:4px 0 8px}
+.photo-tile button{border:1px solid #ffffff9c;background:#ffffffeb;color:#183523;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:700;text-shadow:none;min-height:32px}
+.photo-tile button:hover{background:#fff}
+.visual-note{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--muted);font-size:12px}
+.visual-note svg{width:16px;height:16px;flex:none}
+@media(max-width:620px){.photo-showcase{grid-template-columns:1fr;gap:9px}.photo-tile{min-height:145px}.photo-copy b{font-size:18px}}
+
+</style></head><body>
+<title>Tilth Farm Tycoon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: a season-tinted header band over a tabbed ledger. Each farm opens on an illustrated landscape, a field-work panel where machines do the jobs, and a grid of drawn plots. */
+:root{
+  --bg:#E7ECE2;--surface:#F5F7F1;--surface2:#DCE4D5;--ink:#16231A;--muted:#566559;--line:#C2CDBA;
+  --accent:#1F6B45;--accent-ink:#F5F7F1;--gold:#946010;--good:#26703F;--warn:#9E4A1A;--bad:#A3342B;--soil:#8C6A4A;
+  --grass:#A5C783;--soilc:#9C7550;--dim:0;
+  --f-display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --f-body:'Instrument Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sh:140;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1712;--surface:#17221A;--surface2:#1F2D23;--ink:#E6EDE3;--muted:#9AAC9F;--line:#2C3D31;
+  --accent:#5FBF86;--accent-ink:#0B130E;--gold:#E3AE4A;--good:#6FCF97;--warn:#E8905F;--bad:#EE7C71;--soil:#A98763;
+  --grass:#4A7240;--soilc:#6F513A;--dim:.42;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1712;--surface:#17221A;--surface2:#1F2D23;--ink:#E6EDE3;--muted:#9AAC9F;--line:#2C3D31;
+  --accent:#5FBF86;--accent-ink:#0B130E;--gold:#E3AE4A;--good:#6FCF97;--warn:#E8905F;--bad:#EE7C71;--soil:#A98763;
+  --grass:#4A7240;--soilc:#6F513A;--dim:.42;color-scheme:dark}
+:root[data-season="1"]{--sh:42}
+:root[data-season="2"]{--sh:18}
+:root[data-season="3"]{--sh:206}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:hsl(var(--sh) 36% 19%)}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,p,dl,dd,ul{margin:0}
+ul{padding:0;list-style:none}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+
+/* clarity pass: compact header on phones, no duplicate shortcut tiles */
+.bandtog{display:none}
+@media(max-width:759px){
+  .band{padding-block:12px}
+  .season{font-size:clamp(26px,8vw,34px);margin-top:2px}
+  .season .wk{font-size:12px}
+  .eyebrow{font-size:11px}
+  .stats{gap:10px 16px}
+  .stat b{font-size:19px}
+  .band-grid{gap:10px}
+  .goal{margin-top:10px}
+  .band-grid:not(.open) .strip,.band-grid:not(.open) .next,.band-grid:not(.open) .lvl,.band-grid:not(.open) .stat.sec{display:none}
+  .bandtog{display:block;margin-top:10px;background:none;border:0;padding:6px 0;color:rgba(238,242,232,.85);font:500 12px var(--f-mono);letter-spacing:.04em;min-height:32px}
+}
+.steps{margin:14px 0 18px;padding:0;list-style:none;display:grid;gap:8px;counter-reset:s}
+.steps li{display:flex;gap:10px;align-items:flex-start;counter-increment:s}
+.steps li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:700 13px/24px var(--f-mono);text-align:center}
+
+
+/* Sprout the guide */
+#guide{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:10px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;align-items:flex-end;gap:8px;pointer-events:none}
+#guide>*{pointer-events:auto}
+#guide .gm{flex:none;border:0;background:none;padding:0;animation:sproutbob 2.4s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+#guide .gb{position:relative;max-width:min(78vw,380px);background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:14px;padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+#guide .gb:before{content:"";position:absolute;left:-9px;bottom:20px;width:14px;height:14px;background:var(--surface);border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(45deg)}
+#guide .gb b{font:700 12px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+#guide .gb p{margin:2px 0 4px;font-size:15px;line-height:1.35}
+#guide .gx{background:none;border:0;padding:2px 0;color:var(--muted);font-size:12px;text-decoration:underline}
+body.hasguide{padding-bottom:calc(210px + env(safe-area-inset-bottom,0px))}
+body.hasguide .card.intro{display:none}
+body.hasguide .toast{bottom:calc(272px + env(safe-area-inset-bottom,0px))}
+@keyframes sproutbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes glpulse{0%,100%{box-shadow:0 0 0 0 rgba(242,196,92,.9)}60%{box-shadow:0 0 0 10px rgba(242,196,92,0)}}
+.gl{outline:3px solid #F2C45C!important;outline-offset:3px;animation:glpulse 1.4s ease-out infinite;position:relative;z-index:1}
+@media(prefers-reduced-motion:reduce){#guide .gm,.gl{animation:none}}
+
+
+.gpath{display:flex;justify-content:space-between;gap:2px;margin:6px 0 4px}
+.gpath span{flex:1;text-align:center;opacity:.5}
+.gpath i{display:block;width:28px;height:28px;margin:0 auto;border-radius:50%;background:var(--surface2);border:2px solid var(--line);font:normal 14px/24px var(--f-body);color:var(--ink)}
+.gpath em{display:block;font:500 9px var(--f-mono);letter-spacing:.03em;margin-top:2px;color:var(--muted);font-style:normal}
+.gpath .done{opacity:1}.gpath .done i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.gpath .now{opacity:1}.gpath .now i{border-color:#F2C45C;background:#FFF4D2;box-shadow:0 0 0 3px rgba(242,196,92,.45);transform:scale(1.15)}
+.gpath .now em{color:var(--ink);font-weight:700}
+.cpop{position:fixed;left:50%;top:calc(90px + env(safe-area-inset-top,0px));z-index:40;transform:translateX(-50%);padding:8px 16px;border-radius:999px;font:700 22px var(--f-mono);color:#fff;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:cpopf 1.7s ease-out forwards}
+.cpop.up{background:#26703F}.cpop.down{background:#A3342B}
+@keyframes cpopf{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}15%{opacity:1;transform:translate(-50%,0) scale(1.08)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px) scale(1)}}
+@media(prefers-reduced-motion:reduce){.cpop{animation:none;opacity:1}}
+
+
+.wxline{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font:500 12px var(--f-mono);color:rgba(238,242,232,.9)}
+.wxline span:first-child{background:rgba(255,255,255,.14);border-radius:999px;padding:2px 10px}
+.drop{animation:rainfall .8s linear infinite}
+@keyframes rainfall{from{transform:translateY(-20px)}to{transform:translateY(240px)}}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font:500 12px var(--f-mono);color:var(--muted)}
+.legend .rp{color:var(--gold);font-weight:700}
+.plot[data-s=ready]{box-shadow:0 0 0 2px #F2C45C,0 0 14px rgba(242,196,92,.75);animation:ripeglow 1.6s ease-in-out infinite;border-radius:8px}
+.plot[data-s=growing] .psv{animation:cropsway 3.2s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes ripeglow{0%,100%{box-shadow:0 0 0 2px #F2C45C,0 0 6px rgba(242,196,92,.4)}50%{box-shadow:0 0 0 2px #F2C45C,0 0 18px rgba(242,196,92,.95)}}
+@keyframes cropsway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+.field{position:relative}
+.field.wx-rain:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:10px;background:repeating-linear-gradient(105deg,rgba(143,196,232,.35) 0 1.5px,transparent 1.5px 14px);animation:rainbg .5s linear infinite}
+.field.wx-dry:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:10px;background:rgba(255,154,46,.12)}
+@keyframes rainbg{to{background-position:-14px 28px}}
+.ord{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;font-size:13px}
+.ord.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.ordb{display:flex;gap:6px}
+@media(prefers-reduced-motion:reduce){.drop,.plot[data-s=ready],.plot[data-s=growing] .psv,.field.wx-rain:after{animation:none}}
+
+/* header band */
+.band{background:hsl(var(--sh) 36% 19%);color:#EEF2E8;padding-block:18px 18px;transition:background .6s}
+.band-grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:rgba(238,242,232,.7)}
+.season{font:700 clamp(36px,9vw,60px)/1 var(--f-display);letter-spacing:-.02em;margin-top:4px;text-wrap:balance}
+.season .wk{font:500 13px var(--f-mono);letter-spacing:0;color:rgba(238,242,232,.72);margin-left:6px;white-space:nowrap}
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+.sg span{display:block;margin-top:6px;font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,232,.7)}
+.ticks{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:14px}
+.ticks i{display:block;height:7px;background:rgba(238,242,232,.2);border-radius:1px}
+.ticks i.past{background:rgba(238,242,232,.72)}
+.ticks i.now{height:14px;background:#F2C45C}
+.next{margin-top:10px;font:500 12px var(--f-mono);color:rgba(238,242,232,.82)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px}
+.stat small{display:block;font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(238,242,232,.7)}
+.stat b{display:block;font:500 clamp(19px,5vw,24px) var(--f-mono);font-variant-numeric:tabular-nums;margin-top:2px}
+.stat em{font-style:normal;font:400 12px var(--f-mono);color:rgba(238,242,232,.7)}
+.goal{margin-top:16px;font:500 12px var(--f-mono);color:rgba(238,242,232,.82)}
+.goal .gbar{height:6px;background:rgba(238,242,232,.2);border-radius:3px;margin-top:6px;overflow:hidden}
+.goal .gbar i{display:block;height:100%;background:#F2C45C;border-radius:3px;transition:width .4s}
+@media (min-width:760px){.band-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:end;gap:36px}}
+
+/* tabs */
+.tabs{background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:13px 14px 10px;font-weight:600;color:var(--muted);white-space:nowrap;min-height:46px;display:inline-flex;align-items:center;gap:7px}
+.tab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:2px;border-radius:9px;background:var(--gold);color:var(--bg);font:500 11px/18px var(--f-mono);text-align:center}
+
+.view{padding-block:20px 28px}
+.sec-head{margin-bottom:14px;display:grid;gap:4px}
+.sec-head h2,.h2{font:700 24px/1.15 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
+h3{font:700 17px/1.2 var(--f-display)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.card+.card{margin-top:12px}
+.grid>.card+.card{margin-top:0}
+.stack{display:grid;gap:12px}
+
+/* buttons and tags */
+.btn{min-height:40px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-weight:600;line-height:1.2}
+.btn:hover:not([disabled]){border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.btn.danger.ask{background:var(--bad);color:var(--bg);border-color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.sm{min-height:34px;padding:5px 10px;font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font:500 11px var(--f-mono);letter-spacing:.03em;color:var(--muted)}
+.tag.on{border-color:var(--accent);color:var(--accent)}
+.tag.gold{border-color:var(--gold);color:var(--gold)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+
+/* illustrations */
+.scene{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:var(--surface2)}
+.cloud{animation:drift 80s linear infinite alternate}
+@keyframes drift{from{transform:translateX(-40px)}to{transform:translateX(90px)}}
+.flake{animation:fall 7s linear infinite}
+@keyframes fall{from{transform:translateY(-10px)}to{transform:translateY(190px)}}
+.spr{animation:spr 1.6s ease-in-out infinite}
+@keyframes spr{50%{opacity:.25}}
+.bob{animation:bob 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes bob{50%{transform:translateY(-1.5px)}}
+.ico{width:34px;height:34px;flex:none;display:block}
+.vsvg{display:block;width:100%;height:auto}
+.thumb{margin:-14px -14px 12px;border-radius:10px 10px 0 0;overflow:hidden;border-bottom:1px solid var(--line)}
+.thumb svg{display:block;width:100%;height:auto}
+
+/* farms */
+.intro{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;border-style:dashed}
+.intro p{max-width:62ch;margin-top:2px}
+.farm-layout{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.farm-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.fli{flex:0 0 auto;text-align:left;display:grid;gap:2px;padding:9px 12px;min-width:140px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.fli.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.fli span{font-size:12px;color:var(--muted)}
+.fli .rdy{font-style:normal;color:var(--gold)}
+@media (min-width:820px){.farm-layout{grid-template-columns:210px minmax(0,1fr)}.farm-list{flex-direction:column;overflow:visible}.fli{min-width:0}}
+.farm-head{display:grid;gap:8px;margin-top:14px}
+.farm-head h2{font:700 28px/1.1 var(--f-display);letter-spacing:-.015em}
+.farm-meta{font:400 13px var(--f-mono);color:var(--muted)}
+.label{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:8px}
+.chip{text-align:left;display:grid;grid-template-columns:34px 1fr;column-gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.chip.sel{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+.chip .ico{grid-row:span 3}
+.chip b{font-weight:600}
+.chip .cm{font:400 12px var(--f-mono);color:var(--muted)}
+.cs{font:500 11px var(--f-mono);letter-spacing:.03em}
+.cs.ok{color:var(--good)}.cs.warn{color:var(--warn)}.cs.off{color:var(--muted)}
+
+/* hand work and jobs */
+.hand{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;margin-bottom:10px}
+.hand span{font-size:13px;color:var(--muted)}
+.hand .bar{grid-column:1/-1}
+.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px}
+.job{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.job.has{border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.job .jv{background:var(--surface2);border-radius:8px;padding:6px 4px}
+.job.idle .jv svg{opacity:.45;filter:grayscale(.6)}
+.job .jt{display:grid;gap:1px;min-width:0}
+.job .jt b{font:700 17px/1.2 var(--f-display)}
+.job .jm{font:500 12px var(--f-mono);color:var(--accent)}
+.job.idle .jm{color:var(--warn)}
+.job .jt .muted{font-size:13px}
+.job .ja{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+
+/* plots drawn as small parcels */
+.field{position:relative;border-radius:8px;overflow:hidden}
+.plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+.plot{position:relative;aspect-ratio:1;min-height:66px;padding:0;border:1.5px solid color-mix(in srgb,var(--ink) 18%,transparent);border-radius:6px;background:var(--grass);overflow:hidden;display:block}
+.plot[data-s="1"],.plot[data-s="growing"],.plot[data-s="ready"]{background:var(--soilc)}
+.plot .psv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.plot[data-s="ready"] .crop-g{animation:sway 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes sway{50%{transform:rotate(2.5deg)}}
+.plot .pb{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.25)}
+.plot .pb i{display:block;height:100%;background:#F2C45C}
+.plot .pl{position:absolute;left:3px;bottom:6px;padding:0 5px;border-radius:4px;background:rgba(15,23,18,.72);color:#F1F5EC;font:500 10.5px/16px var(--f-mono)}
+.plot[data-s="ready"]{border:2px solid var(--gold);animation:pulse 2.2s ease-in-out infinite}
+.plot[data-s="ready"] .pl{background:var(--gold);color:#16120A}
+.plot.picked{outline:2px solid var(--accent);outline-offset:1px}
+@keyframes pulse{50%{filter:brightness(1.12)}}
+.pinfo{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.list{display:grid;gap:0}
+.list li{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.list li p{font-size:13px;color:var(--muted);max-width:56ch}
+.list li>div{min-width:0}
+.list li.vr{justify-content:flex-start}
+.list li.vr>div{flex:1}
+.list li.vr .vthumb{width:64px;flex:none}
+
+/* machines driving over the field */
+.drive{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:8px}
+.drive .sweep{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--dc);opacity:.4;animation:sw 1.8s linear forwards}
+.drive .dsp{position:absolute;top:50%;width:92px;margin-top:-30px;left:-92px;animation:cr 1.8s linear forwards;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+@keyframes sw{from{width:0}85%{opacity:.4}to{width:calc(100% + 92px);opacity:0}}
+@keyframes cr{from{left:-92px}to{left:100%}}
+.dsp .vsvg{animation:rumble .18s linear infinite}
+@keyframes rumble{50%{transform:translateY(-1.5px)}}
+.road{position:relative;height:58px;border-radius:8px;overflow:hidden;background:linear-gradient(var(--surface2),var(--surface2)) 0 100%/100% 14px no-repeat,color-mix(in srgb,var(--accent) 8%,var(--surface));border:1px solid var(--line)}
+.road::after{content:"";position:absolute;left:0;right:0;bottom:6px;border-top:2px dashed var(--muted);opacity:.5}
+.road .dsp{position:absolute;bottom:6px;width:76px;left:10px}
+.road .dsp.go{left:-80px;animation:cr 1.8s linear forwards}
+.road .tx{position:absolute;right:12px;top:10px;font:500 12px var(--f-mono);color:var(--muted)}
+
+/* crops / machinery / land */
+.crop header,.land header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.crop header h3,.land header h3{flex:1;min-width:0}
+.price{font:500 18px var(--f-mono);font-variant-numeric:tabular-nums}
+.pricerow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.chg{font:500 13px var(--f-mono)}
+.chg.up{color:var(--good)}.chg.dn{color:var(--bad)}
+.spark{width:120px;height:34px;flex:none}
+.sp-line{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linejoin:round}
+.sp-dot{fill:var(--accent)}
+.crop .tags,.land .tags,.veh .tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.crop .row,.land .row,.veh .row{margin-top:12px}
+.store{display:grid;gap:8px;margin-bottom:12px}
+.veh .vh{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}
+.veh .vh .vsp{background:var(--surface2);border-radius:8px;padding:6px}
+.veh .vh p{font-size:13px;color:var(--muted)}
+.sub{margin:22px 0 10px}
+
+/* bank */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:right;padding:7px 8px;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:0}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--good)}.neg{color:var(--bad)}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.two>.card+.card{margin-top:0}
+.chart{width:100%;height:auto;display:block}
+.ch-grid{stroke:var(--line);stroke-width:1}
+.ch-t{fill:var(--muted);font:11px var(--f-mono)}
+.ch-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.ch-area{fill:var(--accent);fill-opacity:.12}
+.ch-dot{fill:var(--accent)}
+.news li{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.news li:first-child{border-top:0}
+.news .mono{color:var(--muted);flex:none;font-size:12px;padding-top:1px}
+.news .k-bad{color:var(--bad)}.news .k-good{color:var(--good)}.news .k-event{color:var(--warn)}
+
+/* dock + toast */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.dock .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dock-info{min-width:0}
+.dock-info small{display:block;font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.dock-info b{font:500 18px var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dock-btns{display:flex;gap:8px;flex:none}
+.dock .btn{min-height:44px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);z-index:30;max-width:min(92vw,520px);padding:10px 14px;border-radius:8px;background:var(--ink);color:var(--bg);font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.over{text-align:left;max-width:560px}
+.over p{margin:8px 0 14px}
+.gi{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
+.tab svg.ci{stroke:none;width:21px;height:21px}
+.wm{animation:spin 8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.lvl{display:block}.lvl .gbar i{background:#7FD3A0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .16 0 0 0 0 .1 0 0 0 0 .05 0 0 0 1.1 -.35"/></filter>
+<pattern id="gp" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" filter="url(#grain)"/></pattern>
+<linearGradient id="gRed" x2="0" y2="1"><stop offset="0" stop-color="#E8604F"/><stop offset="1" stop-color="#A52A1E"/></linearGradient>
+<linearGradient id="gYel" x2="0" y2="1"><stop offset="0" stop-color="#F6CB57"/><stop offset="1" stop-color="#C8901C"/></linearGradient>
+<linearGradient id="gGlass" x2="0" y2="1"><stop offset="0" stop-color="#DDF2FA"/><stop offset="1" stop-color="#8DC2D8"/></linearGradient>
+<linearGradient id="gCar" x2="0" y2="1"><stop offset="0" stop-color="#F59A3A"/><stop offset="1" stop-color="#D9681A"/></linearGradient>
+<radialGradient id="gTire"><stop offset=".55" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0d0d0d"/></radialGradient>
+<radialGradient id="gTom" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FF7F69"/><stop offset="1" stop-color="#B8281C"/></radialGradient>
+<radialGradient id="gPot" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#E2BE88"/><stop offset="1" stop-color="#A57C46"/></radialGradient>
+<radialGradient id="gPum" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#F8A646"/><stop offset="1" stop-color="#D0600F"/></radialGradient>
+</defs></svg>
+<header class="band" id="band"></header>
+<nav class="tabs" id="tabs" aria-label="Sections"></nav>
+<main class="wrap view" id="view"></main>
+<div class="dock" id="dock"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+const KEY='tilth-save-v3';
+const SEASON_NAMES=['Spring','Summer','Autumn','Winter'];
+const GOALS=[40000,100000,250000,500000,1000000];
+const HAND=6,MGR_HAND=8;
+const CROPS={
+  wheat:{name:'Wheat',h:50,grow:10,seed:50,yield:30,price:13,seasons:[0,2],hardy:true,spoil:0,vol:.05,seasonal:[1,1.05,.85,1.1]},
+  potato:{name:'Potato',h:30,grow:8,seed:60,yield:32,price:13,seasons:[0,2],hardy:false,spoil:.01,vol:.06,seasonal:[1.05,1,.85,1.15]},
+  corn:{name:'Corn',h:78,grow:12,seed:70,yield:40,price:13.5,seasons:[0,1],hardy:false,spoil:.005,vol:.06,seasonal:[1.1,.95,.8,1.1]},
+  carrot:{name:'Carrot',h:18,grow:6,seed:45,yield:26,price:11,seasons:[0,2],hardy:true,spoil:.03,vol:.07,seasonal:[1,1,.9,1.15]},
+  tomato:{name:'Tomato',h:355,grow:8,seed:110,yield:22,price:26,seasons:[0,1],hardy:false,spoil:.08,vol:.12,seasonal:[1.05,.85,1,1.4]},
+  strawberry:{name:'Strawberry',h:320,grow:7,seed:120,yield:14,price:42,seasons:[0,1],hardy:false,spoil:.12,vol:.14,seasonal:[.9,.85,1.1,1.5]},
+  pumpkin:{name:'Pumpkin',h:36,grow:9,seed:60,yield:18,price:32,seasons:[1,2],hardy:false,spoil:.01,vol:.09,seasonal:[1.1,1,.8,1.3]},
+  garlic:{name:'Garlic',h:265,grow:14,seed:90,yield:16,price:45,seasons:[2],hardy:true,spoil:.005,vol:.08,seasonal:[1.05,1,.9,1.1]}
+};
+const CROP_KEYS=Object.keys(CROPS);
+const VEH={
+  tractor:{name:'Tractor',price:9000,desc:'Ploughs every wild plot on its farm in one pass. Crops there also grow 15% faster.'},
+  seeder:{name:'Seed drill',price:4500,desc:'Sows every ploughed plot in one pass and cuts seed cost by 25%.'},
+  harvester:{name:'Combine harvester',price:12000,desc:'Harvests every ready plot in one pass and adds 18% yield.'},
+  sprayer:{name:'Crop sprayer',price:4500,desc:'Sprays the whole farm. Sprayed crops are safe from pests for 6 weeks and yield 6% more.'},
+  truck:{name:'Delivery truck',price:8000,desc:'Hauls your crops to town. While deployed, every crop you sell brings 10% more.'},
+  trailer:{name:'Grain trailer',price:3500,desc:'Adds 250 units of storage while deployed.'}
+};
+const VEH_KEYS=Object.keys(VEH);
+const JOBS={
+  plough:{name:'Plough',veh:'tractor',fuel:4,color:'#6B4527'},
+  sow:{name:'Sow',veh:'seeder',fuel:1,color:'#5FAE4A'},
+  spray:{name:'Spray',veh:'sprayer',fuel:2,color:'#3D95CF'},
+  harvest:{name:'Harvest',veh:'harvester',fuel:3,color:'#E3B33C'}
+};
+const JOB_KEYS=['plough','sow','spray','harvest'];
+const UPG={
+  greenhouse:{name:'Greenhouse',cost:5000,val:3000,desc:'Frost-proof, and lets you sow any crop in any season. Winter seed costs 10% more.'},
+  irrigation:{name:'Irrigation',cost:3000,val:1800,desc:'+8% yield, and dry spells no longer slow this farm.'},
+  silo:{name:'Grain silo',cost:3500,val:2100,desc:'Adds 300 units of storage for the whole business.'},
+  shed:{name:'Machine shed',cost:4000,val:2400,desc:'Shelters machines working here. They age half as fast (keeping their resale value) and upkeep is 30% lower.'},
+  scarecrow:{name:'Scarecrow',cost:800,val:400,desc:'Scares off pests. Pest attacks here destroy about 70% fewer plots.'},
+  fert:{name:'Fertiliser spreader',cost:2500,val:1500,desc:'Crops here grow 10% faster and yield 4% more.'}
+};
+const FARM_NAMES=['Willow Bend','Red Clay Flats','North Ridge','Millbrook','Heron Meadow','Stonegate','Larkfield','Copper Hollow','Ash Terrace','Dunmore','Bramble Row','Quarry Lea','Fenwick Reach','Saltmarsh Acres','Highfold','Barley Cross'];
+
+const LV=[0,120,350,750,1400,2400,3800,6000,9500,15000];
+const TITLES=['Greenhorn','Tiller','Sower','Grower','Yeoman','Steward','Landholder','Agronomist','Estate Owner','Tycoon'];
+const CROP_LV={wheat:1,potato:1,carrot:1,corn:2,pumpkin:3,tomato:3,strawberry:4,garlic:5};
+const VEH_LV={tractor:1,trailer:2,seeder:2,harvester:3,sprayer:3,truck:4};
+const WK=[{role:'Farmhand',hand:2,wage:35,fee:150,lv:1},{role:'Skilled hand',hand:3,wage:55,fee:300,lv:3},{role:'Expert hand',hand:5,wage:85,fee:600,lv:5}];
+const WNAMES=['Ana','Ben','Chidi','Dara','Eli','Farah','Gus','Hana','Ivo','Jun','Kofi','Lena','Mo','Nia','Omar','Pia'];
+const SKINS=['#F1C7A0','#D9A06F','#B87A4B','#8A5632','#5E3A22'],SHIRTS=['#3F7CAC','#C9402E','#4E9F42','#E0A526','#7A4FA0','#2E8B8B'],HATS=['#E3C071','#C9A24B','#8C6A3B','#D9B45A'];
+let S=null;
+const UI={confirm:null,auto:false,anim:null,gi:0,lastCash:null};
+let autoTimer=null,confirmTimer=null,toastTimer=null,animTimer=null;
+
+const $=s=>document.querySelector(s);
+const rand=()=>Math.random();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pick=a=>a[Math.floor(rand()*a.length)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>(n<0?'−$':'$')+Math.round(Math.abs(n)).toLocaleString('en-US');
+const money2=n=>'$'+n.toFixed(2);
+const abbr=n=>{const a=Math.abs(n),s=n<0?'−':'';return a>=1e6?s+'$'+(a/1e6).toFixed(1)+'M':a>=1000?s+'$'+Math.round(a/1000)+'k':s+'$'+Math.round(a);};
+const ck=(a,id,i)=>a+':'+(id===undefined?'':id)+':'+(i===undefined?'':i);
+const colr=k=>'hsl('+CROPS[k].h+' 55% 40%)';
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+
+/* ---------- calendar ---------- */
+const season=()=>Math.floor((S.week%48)/12);
+const wkIn=()=>(S.week%12)+1;
+const yearNo=()=>Math.floor(S.week/48)+1;
+const weeksToWinter=()=>{const r=S.week%48;return r>=36?0:36-r;};
+const weeksToSpring=()=>48-(S.week%48);
+
+/* ---------- state ---------- */
+function base(){
+  return {v:3,xp:0,week:0,cash:12000,loan:0,goalIdx:0,over:false,landIndex:1,nextId:1,
+    farms:[],stock:{},market:{},vehicles:[],listings:[],used:[],log:[],ledger:[],nwHist:[],
+    cur:{income:0,expense:0},ui:{tab:'farms',farm:null,crop:'potato',plot:null,speed:1}};
+}
+/* plot states: s0 wild ground, s1 ploughed, s2 crop in the ground */
+function makeFarm(name,n,soil,o){
+  o=o||{};
+  return {id:S.nextId++,name:name,soil:soil,plots:Array.from({length:n},()=>({s:0})),greenhouse:!!o.greenhouse,irrigation:!!o.irrigation,silo:!!o.silo,manager:false,workers:[],hand:HAND,sprayUntil:-1};
+}
+function newGame(){
+  S=base();
+  CROP_KEYS.forEach(k=>{S.stock[k]=0;S.market[k]={trend:0,impact:1,boom:0,hist:[]};});
+  for(let i=0;i<14;i++){CROP_KEYS.forEach(k=>{const m=S.market[k],c=CROPS[k];m.trend=clamp(m.trend*.88+(rand()-.5)*2*c.vol,-.35,.4);m.hist.push(price(k));});}
+  S.listings.push(genListing(6,true));
+  S.listings.push(genListing(8,true));
+  while(S.listings.length<4)S.listings.push(genListing());
+  while(S.used.length<3){const u=genUsed();if(!u)break;S.used.push(u);}
+  S.nwHist.push(netWorth());
+  log('Welcome to Tilth. It is spring and you have $12,000 but no land yet.');
+}
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===3&&Array.isArray(o.farms)){S=o;S.xp=S.xp||0;return true;}}}catch(e){}
+  return false;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function log(text,kind){S.log.unshift({w:S.week,text:text,kind:kind||'info'});if(S.log.length>80)S.log.length=80;}
+
+/* ---------- economy helpers ---------- */
+const farmHas=(f,t)=>S.vehicles.some(v=>v.type===t&&v.farm===f.id);
+const deployed=t=>S.vehicles.some(v=>v.type===t&&v.farm&&S.farms.some(f=>f.id===v.farm));
+function price(k){const c=CROPS[k],m=S.market[k];return c.price*c.seasonal[season()]*Math.exp(m.trend)*m.impact*(m.boom>0?1.25:1);}
+const landValue=(n,soil)=>Math.round(n*1100*soil*S.landIndex);
+function farmValue(f){let v=landValue(f.plots.length,f.soil);Object.keys(UPG).forEach(k=>{if(f[k])v+=UPG[k].val;});return v;}
+const farmSell=f=>Math.round(farmValue(f)*.92);
+const depVal=(t,age)=>Math.round(VEH[t].price*Math.max(.4,1-.003*age));
+const vehSell=v=>Math.round(depVal(v.type,v.age)*.9);
+const mgrWage=f=>40+4*f.plots.length;
+const capacity=()=>S.farms.reduce((a,f)=>a+150+10*f.plots.length+(f.silo?300:0),0)+250*S.vehicles.filter(v=>v.type==='trailer'&&v.farm&&S.farms.some(f=>f.id===v.farm)).length;
+const stored=()=>CROP_KEYS.reduce((a,k)=>a+S.stock[k],0);
+const stockValue=()=>CROP_KEYS.reduce((a,k)=>a+S.stock[k]*price(k),0);
+const assetValue=()=>S.farms.reduce((a,f)=>a+farmValue(f),0)+S.vehicles.reduce((a,v)=>a+depVal(v.type,v.age),0);
+const netWorth=()=>S.cash+stockValue()+assetValue()-S.loan;
+const creditLimit=()=>Math.round((10000+.5*assetValue())/500)*500;
+function growSpeed(f,s){if(s===undefined)s=season();return(farmHas(f,'tractor')?1.15:1)*((s===3&&!f.greenhouse)?.5:1)*(f.fert?1.1:1);}
+const seedCost=(k,f)=>Math.round(CROPS[k].seed*(farmHas(f,'seeder')?.75:1)*((f.greenhouse&&season()===3)?1.1:1));
+const sprayed=f=>f.sprayUntil>S.week;
+function yieldFor(f,k){
+  const y=CROPS[k].yield*f.soil*(farmHas(f,'harvester')?1.18:1)*(sprayed(f)?1.06:1)*(f.irrigation?1.08:1)*(f.fert?1.04:1)*(.95+rand()*.1);
+  return Math.max(1,Math.round(y));
+}
+function farmStats(f){
+  const r={wild:0,plowed:0,growing:0,ready:0,empty:0};
+  f.plots.forEach(p=>{if(p.s===0)r.wild++;else if(p.s===1)r.plowed++;else if(p.p>=p.need)r.ready++;else r.growing++;});
+  r.empty=r.wild+r.plowed;return r;
+}
+function weeklyCosts(){
+  let land=0,wages=0,mach=0;
+  S.farms.forEach(f=>{land+=25+2*f.plots.length+(f.greenhouse?10:0);if(f.manager)wages+=mgrWage(f);wk(f).forEach(w=>{wages+=WK[w.t].wage;});});
+  S.vehicles.forEach(v=>{const fm=v.farm&&S.farms.find(x=>x.id===v.farm);mach+=VEH[v.type].price*.0025*((fm&&fm.shed)?.7:1);});
+  mach=Math.round(mach);
+  const interest=Math.round(S.loan*.003),over=S.cash<0?Math.round(-S.cash*.01):0;
+  return{land:land,wages:wages,mach:mach,interest:interest,over:over,total:land+wages+mach+interest+over};
+}
+
+/* ---------- listings ---------- */
+function genListing(force,plain){
+  const owned=new Set(S.farms.map(f=>f.name)),taken=new Set(S.listings.map(l=>l.name));
+  const pool=FARM_NAMES.filter(n=>!owned.has(n)&&!taken.has(n));
+  const name=pool.length?pick(pool):'Parcel '+S.nextId;
+  const plots=force||pick([6,8,8,10,12,12,16,20,24]);
+  const soil=Math.round((.8+rand()*.55)*100)/100;
+  const gh=!plain&&rand()<.25,irr=!plain&&rand()<.25,silo=!plain&&rand()<.2;
+  const raw=landValue(plots,soil)*(.92+rand()*.2)+(gh?UPG.greenhouse.cost:0)+(irr?UPG.irrigation.cost:0)+(silo?UPG.silo.cost:0);
+  return{id:S.nextId++,name:name,plots:plots,soil:soil,greenhouse:gh,irrigation:irr,silo:silo,price:Math.round(raw/50)*50};
+}
+function genUsed(){
+  const taken=new Set(S.used.map(u=>u.type));
+  const pool=VEH_KEYS.filter(t=>!taken.has(t));
+  if(!pool.length)return null;
+  const type=pick(pool),age=Math.round(15+rand()*85);
+  return{id:S.nextId++,type:type,age:age,price:Math.round(depVal(type,age)*(.95+rand()*.15)/10)*10};
+}
+
+/* ---------- field work ---------- */
+function plantStatus(f,k){
+  const c=CROPS[k],s=season(),inSeason=c.seasons.includes(s);
+  if(lvl()<CROP_LV[k])return{ok:false,label:'Unlocks Lv '+CROP_LV[k],cls:'off'};
+  if(!f.greenhouse&&!inSeason)return{ok:false,label:'Out of season',cls:'off'};
+  if(f.greenhouse&&!inSeason)return{ok:true,label:'Under glass',cls:'ok'};
+  if(!f.greenhouse&&!c.hardy){const steps=Math.ceil(c.grow/growSpeed(f));if(steps>weeksToWinter())return{ok:true,label:'Frost risk',cls:'warn'};}
+  return{ok:true,label:'Sow now',cls:'ok'};
+}
+function plantPlot(f,i,k){
+  const pl=f.plots[i];
+  if(!pl||pl.s!==1)return'Plough this plot first.';
+  if(lvl()<CROP_LV[k])return CROPS[k].name+' unlocks at level '+CROP_LV[k]+'.';
+  const st=plantStatus(f,k);
+  if(!st.ok)return CROPS[k].name+' cannot be sown in '+SEASON_NAMES[season()].toLowerCase()+' without a greenhouse.';
+  const cost=seedCost(k,f);
+  if(S.cash<cost)return'Not enough cash for seed.';
+  S.cash-=cost;S.cur.expense+=cost;
+  f.plots[i]={s:2,crop:k,p:0,need:CROPS[k].grow};gain(3);
+  return null;
+}
+function addStock(k,n){
+  const room=Math.max(0,capacity()-stored()),keep=Math.min(room,n),over=n-keep;
+  S.stock[k]+=keep;
+  let rev=0;
+  if(over>0){rev=Math.round(over*price(k)*.7);S.cash+=rev;S.cur.income+=rev;}
+  return{keep:keep,over:over,rev:rev};
+}
+function harvestPlot(f,i){
+  const pl=f.plots[i];
+  if(!pl||pl.s!==2||pl.p<pl.need)return null;
+  const n=yieldFor(f,pl.crop);
+  f.plots[i]={s:0};
+  gain(n*.5);const r=addStock(pl.crop,n);
+  return{crop:pl.crop,n:n,over:r.over,rev:r.rev};
+}
+function jobIdx(f,job){
+  const r=[];
+  f.plots.forEach((p,i)=>{
+    if(job==='plough'&&p.s===0)r.push(i);
+    else if(job==='sow'&&p.s===1)r.push(i);
+    else if(job==='spray'&&p.s===2&&p.p<p.need)r.push(i);
+    else if(job==='harvest'&&p.s===2&&p.p>=p.need)r.push(i);
+  });
+  return r;
+}
+/* A job runs on every eligible plot at once when the matching machine works on the farm. Otherwise it uses hand work from budget b. */
+function doJob(f,job,b,o){
+  o=o||{};
+  const J=JOBS[job],idx=jobIdx(f,job),mach=farmHas(f,J.veh);
+  const res={n:0,mach:mach,fuel:0,err:null,got:{},over:0,spent:0};
+  if(!idx.length){res.err='Nothing to '+J.name.toLowerCase()+' on this farm.';return res;}
+  if(job==='spray'){
+    if(!mach){res.err='Spraying needs a crop sprayer working on this farm.';return res;}
+    const fuel=J.fuel*idx.length;S.cash-=fuel;S.cur.expense+=fuel;f.sprayUntil=S.week+6;res.n=idx.length;res.fuel=fuel;return res;
+  }
+  const left=mach?idx.length:b.left;
+  if(left<=0){res.err='No hand work left on this farm this week. Deploy a '+VEH[J.veh].name.toLowerCase()+' or press Next week.';return res;}
+  for(let q=0;q<idx.length;q++){
+    if(res.n>=left)break;
+    const i=idx[q];
+    if(job==='plough')f.plots[i]={s:1};
+    else if(job==='sow'){const e=plantPlot(f,i,o.crop);if(e){res.err=e;break;}res.spent+=seedCost(o.crop,f);}
+    else if(job==='harvest'){const r=harvestPlot(f,i);if(r){res.got[r.crop]=(res.got[r.crop]||0)+r.n;res.over+=r.over;}}
+    res.n++;
+  }
+  if(!mach)b.left-=res.n;
+  else if(res.n){res.fuel=J.fuel*res.n;S.cash-=res.fuel;S.cur.expense+=res.fuel;}
+  return res;
+}
+function runJob(f,job){
+  const b={left:f.hand};
+  const r=doJob(f,job,b,{crop:S.ui.crop});
+  f.hand=b.left;
+  return r;
+}
+function bestCrop(f,cash){
+  const s=season();let best=null,bs=-1e9;
+  CROP_KEYS.forEach(k=>{
+    const c=CROPS[k];
+    if(lvl()<CROP_LV[k]||!(c.seasons.includes(s)||f.greenhouse))return;
+    const cost=seedCost(k,f);
+    if(cost>cash)return;
+    const steps=Math.ceil(c.grow/growSpeed(f,s));
+    if(!f.greenhouse&&!c.hardy&&steps>weeksToWinter())return;
+    const score=(c.yield*f.soil*price(k)*.85-cost)/steps;
+    if(score>bs){bs=score;best=k;}
+  });
+  return best;
+}
+function runManagers(){
+  const t={harvest:0,plough:0,sow:0,spray:0};
+  S.farms.forEach(f=>{
+    if(!f.manager&&!f.auto)return;
+    const b={left:f.manager?MGR_HAND:handMax(f)};
+    t.harvest+=doJob(f,'harvest',b).n;
+    t.plough+=doJob(f,'plough',b).n;
+    const k=bestCrop(f,S.cash);
+    if(k)t.sow+=doJob(f,'sow',b,{crop:k}).n;
+    if(farmHas(f,'sprayer')&&!sprayed(f)&&jobIdx(f,'spray').length)t.spray+=doJob(f,'spray',b).n;
+  });
+  if(t.harvest||t.plough||t.sow||t.spray)log((S.farms.some(x=>x.manager)?'Managers and autopilot':'Autopilot')+' harvested '+t.harvest+', ploughed '+t.plough+', sowed '+t.sow+(t.spray?' and sprayed '+t.spray:'')+' plots.');
+}
+function sell(k,qty){
+  qty=Math.min(Math.floor(qty),S.stock[k]);
+  if(qty<=0)return 0;
+  const p=price(k)*(deployed('truck')?1.1:1),avg=1-Math.min(.4,qty*.0002);
+  const rev=Math.round(qty*p*avg);
+  S.cash+=rev;S.cur.income+=rev;S.stock[k]-=qty;gain(rev/40);
+  S.market[k].impact=Math.max(.55,S.market[k].impact*(1-Math.min(.4,qty*.0004)));
+  return rev;
+}
+function spoil(){
+  CROP_KEYS.forEach(k=>{const r=CROPS[k].spoil;if(r&&S.stock[k]>0)S.stock[k]-=Math.min(S.stock[k],Math.round(S.stock[k]*r));});
+}
+function stepPrices(){
+  CROP_KEYS.forEach(k=>{
+    const c=CROPS[k],m=S.market[k];
+    m.trend=clamp(m.trend*.88+(rand()-.5)*2*c.vol,-.35,.4);
+    m.impact+=(1-m.impact)*.15;
+    if(m.boom>0)m.boom--;
+    m.hist.push(price(k));
+    if(m.hist.length>26)m.hist.shift();
+  });
+}
+function frost(){
+  let lost=0;
+  S.farms.forEach(f=>{
+    if(f.greenhouse)return;
+    f.plots.forEach((pl,i)=>{if(pl.s===2&&!CROPS[pl.crop].hardy&&pl.p<pl.need){f.plots[i]={s:1};lost++;}});
+  });
+  if(lost)log('Frost killed '+lost+' unfinished plot'+(lost===1?'':'s')+'.','bad');
+  else log('Winter has arrived. No crops were lost.');
+}
+function rollEvent(){
+  if(rand()>.14)return;
+  const s=season();
+  const table=[['drought',0],['pests',2],['boom',2],['glut',1],['grant',1],['storm',1],['rain',0]];
+  let tot=0;table.forEach(t=>tot+=t[1]);
+  let r=rand()*tot,ev='grant';
+  for(let i=0;i<table.length;i++){r-=table[i][1];if(r<=0){ev=table[i][0];break;}}
+  if(ev==='drought'){
+    let n=0;
+    S.farms.forEach(f=>{if(f.irrigation)return;f.plots.forEach(pl=>{if(pl.s===2&&pl.p<pl.need){pl.p=Math.max(0,pl.p-1);n++;}});});
+    log(n?'A dry spell set back '+n+' growing plot'+(n===1?'':'s')+' by a week.':'A dry spell passed. Your fields were not affected.',n?'event':'info');
+  }else if(ev==='pests'){
+    const cands=S.farms.filter(f=>farmStats(f).growing>0);
+    if(!cands.length)return;
+    const f=pick(cands);
+    if(sprayed(f)){log('Pests hit '+f.name+', but the sprayed crops held.','good');return;}
+    const idx=[];f.plots.forEach((pl,i)=>{if(pl.s===2&&pl.p<pl.need)idx.push(i);});
+    const lose=Math.max(f.scarecrow?0:1,Math.round(idx.length*(.2+rand()*.15)*(f.scarecrow?.3:1)));
+    for(let n=0;n<lose;n++){const j=Math.floor(rand()*idx.length);f.plots[idx[j]]={s:1};idx.splice(j,1);}
+    if(!lose)log('Pests visited '+f.name+' but the scarecrow chased them off.','good');else log('Pests destroyed '+lose+' plot'+(lose===1?'':'s')+' at '+f.name+'. A scarecrow or crop sprayer prevents this.','bad');
+  }else if(ev==='boom'){
+    const k=pick(CROP_KEYS);S.market[k].boom=4;
+    log('Demand surge: '+CROPS[k].name+' prices are up 25% for 4 weeks.','good');
+  }else if(ev==='glut'){
+    const k=pick(CROP_KEYS);S.market[k].impact=Math.max(.55,S.market[k].impact*.78);
+    log('Imports flood the '+CROPS[k].name.toLowerCase()+' market. Prices dip.','event');
+  }else if(ev==='grant'){
+    S.cash+=600;S.cur.income+=600;log('You received a $600 farm grant.','good');
+  }else if(ev==='storm'){
+    const c=Math.round(300+rand()*300);S.cash-=c;S.cur.expense+=c;log('A storm damaged fences and sheds. Repairs cost '+money(c)+'.','bad');
+  }else if(ev==='rain'){
+    let n=0;S.farms.forEach(f=>f.plots.forEach(pl=>{if(pl.s===2&&pl.p<pl.need){pl.p=Math.min(pl.need,pl.p+.5);n++;}}));
+    if(n)log('Good rain helped '+n+' growing plot'+(n===1?'':'s')+'.','good');
+  }
+}
+const WX={sun:['☀️','Sunny','Normal growth'],cloud:['☁️','Cloudy','Normal growth'],rain:['🌧️','Rain','Crops grow faster'],dry:['🔥','Heatwave','Slows crops without irrigation']};
+function genWx(){
+  const s=season(),T=[[['sun',40],['rain',40],['cloud',15],['dry',5]],[['sun',45],['dry',25],['rain',18],['cloud',12]],[['rain',38],['cloud',27],['sun',30],['dry',5]],[['cloud',45],['sun',30],['rain',25]]][s];
+  let tot=0;T.forEach(t=>tot+=t[1]);let r=rand()*tot;
+  for(let i=0;i<T.length;i++){r-=T[i][1];if(r<=0)return T[i][0];}
+  return'sun';
+}
+function ensureW(){if(!S.wx)S.wx={now:'sun',next:genWx()};}
+function advanceWx(){
+  ensureW();S.wx.now=rand()<.8?S.wx.next:genWx();S.wx.next=genWx();
+  const w=S.wx.now;let n=0;
+  if(w==='rain'){S.farms.forEach(f=>f.plots.forEach(pl=>{if(pl.s===2&&pl.p<pl.need){pl.p=Math.min(pl.need,pl.p+.5);n++;}}));if(n)log('Rain helped '+n+' growing plot'+(n===1?'':'s')+' grow.','good');}
+  else if(w==='dry'){S.farms.forEach(f=>{if(f.irrigation)return;f.plots.forEach(pl=>{if(pl.s===2&&pl.p<pl.need){pl.p=Math.max(0,pl.p-.5);n++;}});});if(n)log('A heatwave slowed '+n+' growing plot'+(n===1?'':'s')+'. Irrigation protects against this.','event');}
+}
+function wxLine(){
+  ensureW();const a=WX[S.wx.now],b=WX[S.wx.next];
+  return'<div class="wxline"><span>'+a[0]+' '+a[1]+' now</span><span>Next week: '+b[0]+' '+b[1].toLowerCase()+' likely · '+b[2].toLowerCase()+'</span></div>';
+}
+function wxTip(){ensureW();const w=S.wx.next;return w==='rain'?' Forecast: rain next week, good for growing.':w==='dry'?' Forecast: heatwave next week. Irrigation helps.':'';}
+function ensureC(){S.contracts=S.contracts||[];S.cOffers=S.cOffers||[];S.cDone=S.cDone||0;while(S.cOffers.length<3)S.cOffers.push(genOffer());}
+function genOffer(){
+  const ks=CROP_KEYS.filter(k=>CROP_LV[k]<=lvl()),k=pick(ks),c=CROPS[k];
+  const qty=Math.max(10,Math.round((20+rand()*30)*(1+lvl()*.25)/5)*5);
+  return{id:S.nextId++,crop:k,qty:qty,reward:Math.round(qty*price(k)*(1.3+rand()*.25)/10)*10,len:c.grow+4+Math.floor(rand()*5)};
+}
+function checkContracts(){
+  ensureC();
+  S.contracts=S.contracts.filter(c=>{
+    if(S.week<=c.due)return true;
+    const pen=Math.round(c.reward*.15);S.cash-=pen;S.cur.expense+=pen;
+    log('Contract missed: '+c.qty+' '+CROPS[c.crop].name.toLowerCase()+'. Penalty '+money(pen)+'.','bad');return false;
+  });
+  if(S.week%4===0){S.cOffers=[];ensureC();log('New contracts are on the board.');}
+}
+function renderContracts(){
+  ensureC();
+  const mine=S.contracts.map(c=>{
+    const have=Math.floor(S.stock[c.crop]),ok=have>=c.qty,left=c.due-S.week;
+    return'<article class="card crop" style="--c:'+colr(c.crop)+'"><header>'+cropIcon(c.crop)+'<h3>'+c.qty+' '+CROPS[c.crop].name+'</h3><span class="price">'+money(c.reward)+'</span></header>'+
+      '<p class="muted">'+(left>0?plural(left,'week')+' left':'Last week to deliver')+' · you have '+have+' of '+c.qty+'</p>'+
+      '<div class="row"><button class="btn primary sm" data-a="cDeliver" data-id="'+c.id+'"'+(ok?'':' disabled')+'>'+(ok?'Deliver now':'Need '+(c.qty-have)+' more')+'</button></div></article>';
+  }).join('');
+  const offers=S.cOffers.map(o=>'<article class="card crop" style="--c:'+colr(o.crop)+'"><header>'+cropIcon(o.crop)+'<h3>'+o.qty+' '+CROPS[o.crop].name+'</h3><span class="price">'+money(o.reward)+'</span></header>'+
+    '<p class="muted">Deliver within '+plural(o.len,'week')+' of accepting. Missing the deadline costs '+money(Math.round(o.reward*.15))+'.</p>'+
+    '<div class="row"><button class="btn sm'+(S.contracts.length<3?' primary':'')+'" data-a="cAccept" data-id="'+o.id+'"'+(S.contracts.length>=3?' disabled':'')+'>Accept contract</button></div></article>').join('');
+  return'<div class="sec-head"><h2>Contracts</h2><p class="muted">Buyers pay a bonus for a fixed amount of one crop by a deadline. Grow it, keep it in storage, then press Deliver. You can hold 3 contracts at once. New ones appear every 4 weeks. Done so far: '+S.cDone+'.</p></div>'+
+    (mine?'<div class="label">Your contracts</div><div class="grid">'+mine+'</div>':'')+
+    '<div class="label">On the board</div><div class="grid">'+(offers||'<p class="muted">No offers right now.</p>')+'</div>';
+}
+function nextWeek(){
+  if(S.over)return false;
+  const prev=season();
+  S.week++;
+  const now=season();
+  S.vehicles.forEach(v=>{const fm=v.farm&&S.farms.find(x=>x.id===v.farm);v.age+=(fm&&fm.shed)?.5:1;});
+  S.farms.forEach(f=>{f.hand=handMax(f);const sp=growSpeed(f,prev);f.plots.forEach(pl=>{if(pl.s===2&&pl.p<pl.need)pl.p=Math.min(pl.need,pl.p+sp);});});
+  if(now!==prev){log(SEASON_NAMES[now]+' begins.');if(now===3)frost();}
+  advanceWx();
+  runManagers();
+  checkContracts();
+  spoil();
+  stepPrices();
+  runOrders();
+  animalWeek();const c=weeklyCosts();
+  S.cash-=c.total;S.cur.expense+=c.total;
+  S.landIndex=clamp(S.landIndex*(1+(rand()-.47)*.006),.8,1.7);
+  rollEvent();
+  if(S.week%4===0){
+    for(let n=0;n<2;n++)if(S.listings.length>2)S.listings.splice(Math.floor(rand()*S.listings.length),1);
+    while(S.listings.length<4)S.listings.push(genListing());
+    log('New farms are listed for sale.');
+  }
+  if(S.week%6===0){
+    if(S.used.length)S.used.splice(Math.floor(rand()*S.used.length),1);
+    while(S.used.length<3){const u=genUsed();if(!u)break;S.used.push(u);}
+  }
+  S.ledger.unshift({w:S.week,income:S.cur.income,expense:S.cur.expense});
+  if(S.ledger.length>12)S.ledger.length=12;
+  S.cur={income:0,expense:0};
+  const nw=netWorth();
+  S.nwHist.push(nw);
+  if(S.nwHist.length>120)S.nwHist.shift();
+  if(S.goalIdx<GOALS.length&&nw>=GOALS[S.goalIdx]){log('Goal reached: net worth passed '+money(GOALS[S.goalIdx])+'.','good');S.goalIdx++;}
+  if(S.cash<-15000){S.over=true;log('The bank closed your accounts.','bad');}
+  save();
+  return true;
+}
+function notifyWeek(){
+  const items=S.log.filter(e=>e.w===S.week&&e.kind!=='info').slice(0,2).map(e=>e.text);
+  if(items.length)toast(items.join(' · '),'warn');
+}
+
+/* ---------- UI helpers ---------- */
+function toast(msg,kind){
+  const t=$('#toast');
+  t.textContent=msg;t.className='toast show'+(kind?' '+kind:'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.className='toast';},7000);
+}
+function setAnim(t,job,farm,tab){
+  UI.anim={t:t,job:job,farm:farm,tab:tab||null,at:Date.now()};
+  clearTimeout(animTimer);
+  animTimer=setTimeout(()=>{UI.anim=null;},1900);
+}
+const animLeft=()=>UI.anim?Date.now()-UI.anim.at:-1;
+function setAuto(on){
+  clearInterval(autoTimer);autoTimer=null;UI.auto=!!on;
+  if(on&&!S.over){
+    autoTimer=setInterval(()=>{
+      if(S.over){setAuto(false);render();return;}
+      nextWeek();notifyWeek();render();
+    },1800/S.ui.speed);
+  }
+}
+function spark(h){
+  const W=120,H=34,mn=Math.min.apply(null,h),mx=Math.max.apply(null,h),r=(mx-mn)||1;
+  const X=i=>(2+(W-4)*i/(h.length-1)).toFixed(1),Y=v=>(H-4-(H-8)*(v-mn)/r).toFixed(1);
+  const pts=h.map((v,i)=>X(i)+','+Y(v)).join(' ');
+  return'<svg class="spark" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline class="sp-line" points="'+pts+'"/><circle class="sp-dot" cx="'+X(h.length-1)+'" cy="'+Y(h[h.length-1])+'" r="3"/></svg>';
+}
+function chart(){
+  const d=S.nwHist;
+  if(d.length<2)return'<p class="muted">Your net worth chart appears after the first week.</p>';
+  const W=640,H=220,l=54,r=12,t=14,b=28;
+  let mn=Math.min.apply(null,d),mx=Math.max.apply(null,d);
+  if(mx-mn<1000){mx+=500;mn-=500;}
+  const pad=(mx-mn)*.08;mn-=pad;mx+=pad;
+  const X=i=>l+(W-l-r)*i/(d.length-1),Y=v=>t+(H-t-b)*(1-(v-mn)/(mx-mn));
+  let grid='';
+  for(let i=0;i<4;i++){const v=mn+(mx-mn)*i/3,y=Y(v).toFixed(1);grid+='<line class="ch-grid" x1="'+l+'" x2="'+(W-r)+'" y1="'+y+'" y2="'+y+'"/><text class="ch-t" x="'+(l-6)+'" y="'+(+y+4)+'" text-anchor="end">'+abbr(v)+'</text>';}
+  const pts=d.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+  const area=X(0).toFixed(1)+','+(H-b)+' '+pts+' '+X(d.length-1).toFixed(1)+','+(H-b);
+  return'<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Net worth by week"><title>Net worth by week</title>'+grid+
+    '<polygon class="ch-area" points="'+area+'"/><polyline class="ch-line" points="'+pts+'"/>'+
+    '<circle class="ch-dot" cx="'+X(d.length-1).toFixed(1)+'" cy="'+Y(d[d.length-1]).toFixed(1)+'" r="4"/>'+
+    '<text class="ch-t" x="'+l+'" y="'+(H-8)+'">Week '+(S.week-d.length+2)+'</text>'+
+    '<text class="ch-t" x="'+(W-r)+'" y="'+(H-8)+'" text-anchor="end">Week '+(S.week+1)+'</text></svg>';
+}
+const soilWord=s=>s<.95?'Poor':s<1.1?'Average':s<1.25?'Good':'Rich';
+
+/* ---------- artwork ---------- */
+const GR='#4E9F42',GD='#3A7F34';
+function cropArt(k,st){
+  let o='';
+  const hh=[8,16,24,30][st],r=[4,8,11,13][st];
+  switch(k){
+    case'wheat':
+      [10,18,26,34].forEach((x,j)=>{
+        const h=hh-(j%2?3:0),c=st===3?'#D9A83A':'#7DB04E';
+        o+=`<path d="M${x} 44V${44-h}" stroke="${c}" stroke-width="2" fill="none"/>`;
+        if(st>=2)o+=`<ellipse cx="${x}" cy="${44-h-3}" rx="2.4" ry="5" fill="${st===3?'#E7BC4C':'#9BC259'}"/>`;
+      });break;
+    case'corn':
+      [15,33].forEach(x=>{
+        const h=[10,22,32,36][st];
+        o+=`<path d="M${x} 44V${44-h}" stroke="#5FA544" stroke-width="3" fill="none"/>`;
+        if(st>=1)o+=`<path d="M${x} ${44-h*.4}q-9 -4 -11 -12M${x} ${44-h*.6}q9 -4 11 -12" stroke="#4C9440" stroke-width="2.2" fill="none"/>`;
+        if(st>=2)o+=`<ellipse cx="${x+4}" cy="${44-h*.55}" rx="2.6" ry="5" fill="${st===3?'#F0C53D':'#BFD26A'}"/>`;
+        if(st===3)o+=`<path d="M${x} ${44-h}l-3 -5M${x} ${44-h}l3 -5" stroke="#D9B84A" stroke-width="1.5"/>`;
+      });break;
+    case'potato':
+      o+=`<circle cx="17" cy="${42-r*.6}" r="${r*.8}" fill="${GD}"/><circle cx="31" cy="${42-r*.6}" r="${r*.8}" fill="${GD}"/><circle cx="24" cy="${40-r}" r="${r}" fill="${GR}"/>`;
+      if(st>=2)o+=`<circle cx="21" cy="${34-r*.5}" r="1.8" fill="#C79BE3"/><circle cx="28" cy="${32-r*.5}" r="1.8" fill="#C79BE3"/>`;
+      if(st===3)o+=`<ellipse cx="13" cy="44" rx="4" ry="2.6" fill="#B98B54"/><ellipse cx="35" cy="44" rx="4.5" ry="2.8" fill="#B98B54"/><ellipse cx="24" cy="45" rx="3.5" ry="2.2" fill="#C99C62"/>`;
+      break;
+    case'carrot':{
+      const h=[6,12,18,22][st];
+      [14,24,34].forEach(x=>{
+        o+=`<path d="M${x} 42L${x-5} ${42-h}M${x} 42L${x} ${40-h-2}M${x} 42L${x+5} ${42-h}" stroke="${GR}" stroke-width="2.2" stroke-linecap="round" fill="none"/>`;
+        if(st===3)o+=`<path d="M${x-4} 42h8l-4 5z" fill="#EC8A23"/>`;
+      });break;}
+    case'tomato':
+      o+=`<path d="M24 44V${44-r*2.2}" stroke="#8B6B45" stroke-width="2"/><circle cx="16" cy="${40-r*.5}" r="${r*.7}" fill="${GD}"/><circle cx="32" cy="${40-r*.5}" r="${r*.7}" fill="${GD}"/><circle cx="24" cy="${38-r}" r="${r+2}" fill="${GR}"/>`;
+      if(st>=2){const c=st===3?'#D8382B':'#A9C95A';o+=`<circle cx="19" cy="${40-r*.7}" r="2.7" fill="${c}"/><circle cx="29" cy="${38-r*.8}" r="2.7" fill="${c}"/><circle cx="24" cy="${42-r*1.7}" r="2.7" fill="${c}"/>`;}
+      break;
+    case'strawberry':{
+      const q=[3,6,8,9][st];
+      o+=`<ellipse cx="14" cy="40" rx="${q+2}" ry="${q}" fill="${GD}"/><ellipse cx="34" cy="40" rx="${q+2}" ry="${q}" fill="${GD}"/><ellipse cx="24" cy="38" rx="${q+4}" ry="${q+1}" fill="${GR}"/>`;
+      if(st===1)o+=`<circle cx="20" cy="36" r="2" fill="#fff"/><circle cx="30" cy="35" r="2" fill="#fff"/>`;
+      if(st>=2){const c=st===3?'#D9283C':'#E7A0A0';[[15,43],[24,44],[33,43],[20,38],[29,38]].forEach(p=>{o+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${c}"/>`;});}
+      break;}
+    case'pumpkin':{
+      const q=[0,4,7,9][st];
+      o+=`<path d="M6 40q10 -10 20 -2t18 -6" stroke="${GR}" stroke-width="2.4" fill="none"/><ellipse cx="12" cy="36" rx="5" ry="3" fill="${GD}"/><ellipse cx="38" cy="34" rx="5" ry="3" fill="${GD}"/>`;
+      if(st>=1)o+=`<ellipse cx="24" cy="${42-q*.6}" rx="${q*1.15}" ry="${q}" fill="${st===3?'#E9822A':'#9BBE4C'}"/>`;
+      if(st>=2)o+=`<rect x="23" y="${42-q*1.6}" width="2.4" height="4" fill="#6B5A2E"/>`;
+      if(st===3)o+=`<ellipse cx="38" cy="42" rx="5" ry="4" fill="#E9822A"/>`;
+      break;}
+    case'garlic':{
+      const h=[8,14,20,24][st];
+      [12,19,26,33].forEach((x,j)=>{
+        o+=`<path d="M${x} 44q${j%2?3:-3} -${h*.6} 0 -${h}" stroke="${st===3?'#B8C86A':GR}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+        if(st===3)o+=`<circle cx="${x}" cy="44" r="3.2" fill="#F1ECE0" stroke="#CFC6B4" stroke-width=".8"/>`;
+      });break;}
+  }
+  return '<g class="crop-g">'+o+'</g>';
+}
+function cropIcon0(k){
+  return'<svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="23" fill="rgba(140,106,74,.22)"/>'+cropArt(k,3)+'</svg>';
+}
+function plotSVG(pl){
+  let o='<rect width="48" height="48" fill="'+(pl.s?'#7B573A':'#6F9F4A')+'"/><rect width="48" height="48" fill="url(#gp)" opacity=".75"/>';
+  if(pl.s===0)o+='<g stroke="#5E8F46" stroke-width="1.6" stroke-linecap="round" opacity=".85"><path d="M9 16l2-6M13 16l-1-5M33 30l2-6M37 30l-1-5M15 42l2-6M19 42l-1-5M40 44l1-5"/></g><circle cx="38" cy="11" r="1.7" fill="#F6E27C"/><circle cx="9" cy="30" r="1.5" fill="#fff"/>';
+  else o+='<g stroke="rgba(50,32,16,.34)" stroke-width="2.4" stroke-linecap="round"><path d="M4 12H44M4 22H44M4 32H44M4 42H44"/></g>';
+  if(pl.s===2){const st=pl.p>=pl.need?3:Math.min(2,Math.floor(pl.p/pl.need*3));o+=cropArt(pl.crop,st);}
+  return'<svg class="psv" viewBox="0 0 48 48" aria-hidden="true">'+o+'</svg>';
+}
+function vehInner0(t){
+  const W=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#222" stroke="#666" stroke-width="1"/><circle cx="${cx}" cy="${cy}" r="${r*.42}" fill="#E8C45A"/>`;
+  switch(t){
+    case'tractor':return`<rect x="40" y="20" width="30" height="12" rx="3" fill="#C9402E"/><rect x="14" y="8" width="28" height="24" rx="3" fill="#C9402E"/><rect x="19" y="11" width="18" height="11" rx="2" fill="#BFE3F2"/><rect x="62" y="9" width="3" height="12" fill="#555"/>`+W(24,35,12)+W(60,40,7);
+    case'seeder':return`<rect x="6" y="8" width="62" height="18" rx="3" fill="#2F8F59"/><rect x="6" y="8" width="62" height="5" rx="2" fill="#46AD74"/><path d="M14 26v10M26 26v10M38 26v10M50 26v10M62 26v10" stroke="#666" stroke-width="2"/>`+W(24,38,9)+W(54,38,9)+`<path d="M68 20l9 6" stroke="#666" stroke-width="2.5"/>`;
+    case'harvester':return`<rect x="8" y="14" width="48" height="20" rx="3" fill="#D9A21F"/><rect x="8" y="5" width="32" height="11" rx="2" fill="#E8BB3F"/><rect x="42" y="9" width="14" height="15" rx="2" fill="#BFE3F2" stroke="#B88A17"/><rect x="58" y="24" width="18" height="12" rx="1" fill="#C28E17"/><rect x="58" y="20" width="18" height="4" fill="#A97A12"/><path d="M14 6L4 2" stroke="#888" stroke-width="3"/>`+W(22,38,9)+W(48,40,7);
+    case'sprayer':return`<ellipse cx="28" cy="14" rx="19" ry="9" fill="#3D95CF"/><rect x="8" y="18" width="42" height="14" rx="3" fill="#2E7FB8"/><rect x="44" y="10" width="15" height="17" rx="3" fill="#2E7FB8"/><rect x="48" y="13" width="8" height="8" rx="1.5" fill="#BFE3F2"/><path d="M28 32L3 41M28 32L77 41" stroke="#777" stroke-width="2.5"/><circle cx="3" cy="41" r="1.8" fill="#9FD7F5"/><circle cx="77" cy="41" r="1.8" fill="#9FD7F5"/>`+W(18,38,8)+W(52,40,7);
+    case'truck':return`<rect x="4" y="9" width="44" height="25" rx="2" fill="#EDE6D3"/><rect x="4" y="22" width="44" height="4" fill="#3F9B63"/><path d="M50 15h14l9 11v9H50z" fill="#2F8F59"/><path d="M54 18h8l6 8H54z" fill="#BFE3F2"/>`+W(16,37,8)+W(62,37,8);
+    case'trailer':return`<path d="M6 12h58l-4 22H10z" fill="#B07A3A"/><path d="M8 13q20 -12 54 0z" fill="#E3B84F"/><path d="M64 26l12 5" stroke="#666" stroke-width="2.5"/>`+W(26,38,8)+W(48,38,8);
+  }
+  return'';
+}
+const vehSVG=t=>'<svg class="vsvg" viewBox="0 0 80 48" aria-hidden="true">'+vehInner(t)+'</svg>';
+function ic(n,c){
+  const P={
+    coin:'<circle cx="12" cy="12" r="10" fill="#E3AE4A" stroke="#B07C1E" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="#7A520F" font-family="sans-serif">$</text>',
+    chart:'<rect x="3" y="13" width="4.5" height="8" rx="1" fill="#7FD3A0"/><rect x="9.8" y="8" width="4.5" height="13" rx="1" fill="#3F9B63"/><rect x="16.5" y="3" width="4.5" height="18" rx="1" fill="#1F6B45"/>',
+    silo:'<rect x="6" y="8" width="12" height="14" fill="#C5CCD1"/><path d="M6 8a6 6 0 0 1 12 0z" fill="#8F9AA1"/><path d="M6 13h12M6 18h12" stroke="#8B969C" stroke-width="1"/>',
+    bank:'<path d="M2 9l10-6 10 6z" fill="#E3AE4A"/><path d="M4.5 10.5h3v8h-3zM10.5 10.5h3v8h-3zM16.5 10.5h3v8h-3z" fill="#F2E8D8" stroke="#B9AE96" stroke-width=".6"/><rect x="2" y="19.5" width="20" height="2.5" rx="1" fill="#B07C1E"/>',
+    star:'<path d="M12 2l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 18.3l-6.4 3.2 1.4-7.1L1.7 9.5l7.2-.9z" fill="#F2C45C" stroke="#B07C1E" stroke-width="1"/>',
+    farms:'<path d="M3 21V10.5L12 4l9 6.5V21z" fill="#B5382A"/><path d="M2 11L12 3.5 22 11" stroke="#7C2A22" stroke-width="2" fill="none"/><rect x="8.5" y="12.5" width="7" height="8.5" fill="#F2E8D8"/><path d="M8.5 12.5l7 8.5M15.5 12.5l-7 8.5" stroke="#B5382A" stroke-width="1.2"/>',
+    land:'<path d="M12 22.5s-7.5-6.2-7.5-12.5a7.5 7.5 0 0 1 15 0c0 6.3-7.5 12.5-7.5 12.5z" fill="#3E8E3A"/><circle cx="12" cy="10" r="3.2" fill="#F2E8D8"/>',
+    crops:'<path d="M12 22V8" stroke="#8A6A2A" stroke-width="2"/><g fill="#E3AE4A" stroke="#B07C1E" stroke-width=".6"><ellipse cx="12" cy="6" rx="2.4" ry="4"/><ellipse cx="7.5" cy="10.5" rx="2" ry="3.6" transform="rotate(-25 7.5 10.5)"/><ellipse cx="16.5" cy="10.5" rx="2" ry="3.6" transform="rotate(25 16.5 10.5)"/><ellipse cx="8" cy="16" rx="2" ry="3.4" transform="rotate(-25 8 16)"/><ellipse cx="16" cy="16" rx="2" ry="3.4" transform="rotate(25 16 16)"/></g>',
+    machines:'<path d="M3 8h9l1 8H3z" fill="#C9402E"/><path d="M12 11h8l2 5H12z" fill="#C9402E"/><rect x="5" y="9.5" width="5.5" height="4" fill="#BFE3F2"/><circle cx="7" cy="18" r="4" fill="#222"/><circle cx="7" cy="18" r="1.8" fill="#E3AE4A"/><circle cx="19" cy="19" r="2.6" fill="#222"/><circle cx="19" cy="19" r="1" fill="#E3AE4A"/>'
+  };
+  return'<svg class="'+(c||'gi')+'" viewBox="0 0 24 24" aria-hidden="true">'+(P[n]||'')+'</svg>';
+}
+function tabIcon(n){return ic(n,'ci');}
+const ANIM={chicken:{name:'Chicken',price:80,inc:9,feed:3,lv:2,what:'Eggs'},sheep:{name:'Sheep',price:300,inc:30,feed:10,lv:4,what:'Wool'},cow:{name:'Cow',price:700,inc:65,feed:22,lv:6,what:'Milk'}};
+const apl=A=>A.name==='Sheep'?'Sheep':A.name+'s';
+const an=f=>f.animals||(f.animals={chicken:0,sheep:0,cow:0});
+const AA={
+  chicken:'<ellipse cx="22" cy="28" rx="13" ry="10" fill="#F6F1E6" stroke="#CFC3AA"/><circle cx="35" cy="17" r="6" fill="#F6F1E6" stroke="#CFC3AA"/><path d="M33 11q2-5 4 0 2-3 3 1z" fill="#D8382B"/><path d="M40 17l5 2-5 2z" fill="#F0A830"/><circle cx="36" cy="16" r="1" fill="#222"/><path d="M8 24q-4 4 0 10l8-4z" fill="#E4DCCB"/><path d="M20 38v6M26 38v6M17 44h5M23 44h5" stroke="#E0A030" stroke-width="2"/>',
+  sheep:'<g fill="#F4F1EA" stroke="#D5D0C3"><circle cx="18" cy="24" r="9"/><circle cx="27" cy="22" r="9"/><circle cx="22" cy="30" r="9"/><circle cx="13" cy="30" r="7"/><circle cx="32" cy="30" r="7"/></g><ellipse cx="38" cy="25" rx="5" ry="6" fill="#3A3330"/><circle cx="39" cy="24" r="1" fill="#fff"/><path d="M12 38v7M17 38v7M28 38v7M33 38v7" stroke="#3A3330" stroke-width="2.5"/>',
+  cow:'<rect x="6" y="18" width="30" height="18" rx="7" fill="#F7F4EE" stroke="#CFC8B8"/><path d="M12 20q6-2 7 6-5 4-9 0zM26 30q6-2 8 3-4 3-8 0z" fill="#2B2623"/><rect x="32" y="13" width="12" height="13" rx="4" fill="#F7F4EE" stroke="#CFC8B8"/><ellipse cx="40" cy="23" rx="5" ry="3.5" fill="#F2B6B0"/><path d="M33 13l-2-4M43 13l2-4" stroke="#E8DDBF" stroke-width="2.5"/><circle cx="36" cy="18" r="1" fill="#222"/><path d="M10 36v8M18 36v8M28 36v8M33 36v8" stroke="#2B2623" stroke-width="3"/><path d="M6 22q-4 4-2 12" stroke="#2B2623" stroke-width="2" fill="none"/>'
+};
+const animalIcon=k=>'<svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="23" fill="rgba(140,106,74,.2)"/>'+AA[k]+'</svg>';
+function animalWeek(){
+  let inc=0,fd=0,n=0;
+  S.farms.forEach(f=>{const a=an(f);Object.keys(ANIM).forEach(k=>{const c=a[k]||0;if(!c)return;inc+=Math.round(c*ANIM[k].inc*(.9+rand()*.2));fd+=c*ANIM[k].feed;n+=c;});});
+  if(n){S.cash+=inc-fd;S.cur.income+=inc;S.cur.expense+=fd;gain(n*.3);log('Animals: '+money(inc)+' from eggs, wool and milk, '+money(fd)+' on feed.');}
+}
+function animalCard(f){
+  const a=an(f),L=lvl();
+  const rows=Object.keys(ANIM).map(k=>{
+    const A=ANIM[k],c=a[k]||0,lock=L<A.lv,full=c>=10;
+    return'<li class="vr"><div class="vthumb">'+animalIcon(k)+'</div><div><b>'+apl(A)+' <span class="tag'+(c?' on':'')+'">'+c+' / 10</span></b><p>'+(lock?'Unlocks at level '+A.lv:A.what+' · earns '+money(A.inc)+'/wk each, feed '+money(A.feed)+'/wk')+'</p></div><span class="row"><button class="btn sm primary" data-a="buyAn" data-id="'+f.id+'" data-k="'+k+'"'+(lock||full||S.cash<A.price?' disabled':'')+'>Buy '+money(A.price)+'</button><button class="btn sm" data-a="sellAn" data-id="'+f.id+'" data-k="'+k+'"'+(c?'':' disabled')+'>Sell</button></span></li>';
+  }).join('');
+  return'<div class="label">Animal pen</div><div class="card"><ul class="list">'+rows+'</ul><p class="muted" style="margin-top:8px;font-size:13px">Animals pay out every week with no ploughing needed. Feed is paid weekly too, so keep some cash in hand. Selling returns 70% of the price.</p></div>';
+}
+const CI={
+  wheat:'<path d="M15 43V22M24 43V13M33 43V22" stroke="#B98A2E" stroke-width="2"/>'+[[15,22],[24,13],[33,22]].map(p=>'<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="4" ry="9" fill="url(#gYel)" stroke="#9A6B12" stroke-width=".6"/><path d="M'+p[0]+' '+(p[1]-7)+'V'+(p[1]+7)+'" stroke="#9A6B12" stroke-width=".8"/>').join(''),
+  potato:'<ellipse cx="24" cy="26" rx="16" ry="12" fill="url(#gPot)" transform="rotate(-12 24 26)"/><g fill="#7A5A33"><circle cx="18" cy="24" r="1.3"/><circle cx="28" cy="29" r="1.3"/><circle cx="31" cy="22" r="1.1"/><circle cx="21" cy="31" r="1"/></g>',
+  corn:'<path d="M24 6c8 4 9 20 0 34-9-14-8-30 0-34z" fill="url(#gYel)"/><path d="M19 14h10M18 21h12M18 28h12M20 35h8M24 6v34" stroke="#C9971B" stroke-width=".9"/><path d="M24 43C12 41 10 27 12 19c4 8 8 14 12 18zM24 43c12-2 14-16 12-24-4 8-8 14-12 18z" fill="#4E9F42"/>',
+  carrot:'<path d="M15 16h18L26 45h-4z" fill="url(#gCar)"/><path d="M18 23h6M25 29h5M21 35h4" stroke="#B5530E" stroke-width="1.2"/><path d="M24 16c-6-2-8-8-6-12 4 1 6 6 6 12zM24 16c0-7 2-11 6-12 1 4-1 9-6 12z" fill="#4E9F42"/>',
+  tomato:'<circle cx="24" cy="28" r="15" fill="url(#gTom)"/><path d="M24 15l-6 4 6-1 6 1zM24 11v7" stroke="#3E8A34" stroke-width="3" stroke-linejoin="round" fill="#3E8A34"/><ellipse cx="18" cy="22" rx="4" ry="2.6" fill="#fff" opacity=".35"/>',
+  strawberry:'<path d="M10 19c0-7 28-7 28 0 0 12-10 25-14 25S10 31 10 19z" fill="url(#gTom)"/><g fill="#F7E08A"><circle cx="17" cy="23" r="1"/><circle cx="24" cy="27" r="1"/><circle cx="31" cy="23" r="1"/><circle cx="20" cy="32" r="1"/><circle cx="28" cy="33" r="1"/><circle cx="24" cy="38" r="1"/></g><path d="M13 17l11-7 11 7-11-3z" fill="#3E8A34"/>',
+  pumpkin:'<ellipse cx="24" cy="29" rx="18" ry="14" fill="url(#gPum)"/><path d="M24 15c-7 6-7 22 0 28M24 15c7 6 7 22 0 28M24 15c-13 4-14 20-6 26" stroke="#B5560F" stroke-width="1.2" fill="none"/><rect x="22" y="8" width="4" height="8" rx="1.5" fill="#5E7A2A"/>',
+  garlic:'<path d="M24 8c-2 6-14 10-14 24 0 6 6 10 14 10s14-4 14-10c0-14-12-18-14-24z" fill="#F4EFE4" stroke="#CFC3AA"/><path d="M24 14c-4 10-6 20-3 28M24 14c4 10 6 20 3 28" stroke="#CFC3AA" fill="none"/>'
+};
+function cropIcon(k){return'<svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="23" fill="rgba(140,106,74,.2)"/>'+(CI[k]||'')+'</svg>';}
+const TR=(x,y,r)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="url(#gTire)"/><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="none" stroke="#000" stroke-width="1.6" stroke-dasharray="2.2 2.2" opacity=".5"/><circle cx="'+x+'" cy="'+y+'" r="'+r*.55+'" fill="#D9A21F" stroke="#8a6410"/><circle cx="'+x+'" cy="'+y+'" r="'+r*.15+'" fill="#333"/>';
+const NV={
+  tractor:()=>'<path d="M38 17h26q6 0 9 7v9H38z" fill="url(#gRed)"/><rect x="69" y="21" width="4" height="9" rx="1" fill="#2a2a2a"/><rect x="58" y="7" width="3" height="11" fill="#444"/><path d="M10 6h28l3 28H9z" fill="url(#gRed)"/><path d="M14 10h20l1 15H13z" fill="url(#gGlass)"/><rect x="8" y="3" width="32" height="4" rx="2" fill="#7e1d14"/>'+TR(22,35,13)+TR(61,39,8.5),
+  harvester:()=>'<path d="M6 16h50v20H6z" fill="url(#gYel)"/><path d="M8 5h30l4 11H8z" fill="url(#gYel)"/><path d="M44 8h12v14H44z" fill="url(#gGlass)" stroke="#B88A17"/><path d="M12 5L2 1" stroke="#777" stroke-width="3"/><path d="M56 26h22v11H56z" fill="#C28E17"/><path d="M58 26v11M63 26v11M68 26v11M73 26v11" stroke="#8a6410"/><path d="M56 22h22v4H56z" fill="#D63A2A"/>'+TR(22,38,9)+TR(48,40,7)
+};
+function vehInner(t){const f=NV[t];return f?f():vehInner0(t);}
+const person=w=>'<g class="bob"><rect x="12" y="26" width="16" height="20" rx="5" fill="'+w.shirt+'"/><rect x="13" y="44" width="5" height="11" fill="#2F3E55"/><rect x="22" y="44" width="5" height="11" fill="#2F3E55"/><circle cx="20" cy="15" r="9" fill="'+w.skin+'"/><path d="M10 12h20l-3-7H13z" fill="'+w.hat+'"/><rect x="5" y="11" width="30" height="3.5" rx="1.7" fill="'+w.hat+'"/><circle cx="17" cy="17" r="1" fill="#222"/><circle cx="23" cy="17" r="1" fill="#222"/><path d="M17 21q3 2 6 0" stroke="#7a3b2a" fill="none" stroke-width="1"/></g>';
+const portrait=(w,sz)=>'<svg viewBox="0 0 40 56" width="'+sz+'" height="'+Math.round(sz*1.4)+'" aria-hidden="true">'+person(w)+'</svg>';
+const wk=f=>f.workers||(f.workers=[]);
+const handMax=f=>HAND+wk(f).reduce((a,w)=>a+WK[w.t].hand,0);
+const maxCrew=()=>Math.min(8,1+lvl());
+function lvl(){let l=1;while(l<LV.length&&(S.xp||0)>=LV[l])l++;return l;}
+function gain(n){
+  const b=lvl();S.xp=(S.xp||0)+n;const a=lvl();
+  if(a>b){log('Level up! You reached level '+a+': '+TITLES[a-1]+'.','good');setTimeout(()=>toast('Level up! You are now level '+a+', '+TITLES[a-1]+'.','good'),400);}
+}
+function lvBlock(){
+  const l=lvl(),a=LV[l-1],b=LV[l]||a+1,p=l>=LV.length?100:clamp((S.xp-a)/(b-a)*100,0,100);
+  const nu=[];
+  CROP_KEYS.forEach(k=>{if(CROP_LV[k]===l+1)nu.push(CROPS[k].name);});
+  VEH_KEYS.forEach(k=>{if(VEH_LV[k]===l+1)nu.push(VEH[k].name);});
+  WK.forEach(t=>{if(t.lv===l+1)nu.push(t.role);});
+  Object.keys(ANIM).forEach(k=>{if(ANIM[k].lv===l+1)nu.push(apl(ANIM[k]));});
+  return'<div class="goal lvl">'+ic('star')+'Level '+l+' · '+TITLES[l-1]+'<span style="float:right">'+Math.floor(S.xp)+(l<LV.length?' / '+b:'')+' xp</span><div class="gbar"><i style="width:'+p.toFixed(1)+'%"></i></div>'+(nu.length&&l<LV.length?'<div class="next">Level '+(l+1)+' unlocks: '+nu.join(', ')+'</div>':'')+'</div>';
+}
+function crewCard(f){
+  const ws=wk(f),mx=maxCrew(),L=lvl();
+  const rows=ws.map(w=>'<li class="vr"><div class="vthumb">'+portrait(w,44)+'</div><div><b>'+esc(w.name)+' <span class="tag">'+WK[w.t].role+'</span></b><p>+'+WK[w.t].hand+' hand work a week · wage '+money(WK[w.t].wage)+'/wk</p></div><button class="btn sm danger" data-a="fire" data-id="'+f.id+'" data-i="'+w.id+'">Let go</button></li>').join('');
+  const hire=WK.map((t,k)=>{const lock=L<t.lv,full=ws.length>=mx;return'<button class="btn sm'+(!lock&&!full?' primary':'')+'" data-a="hire" data-id="'+f.id+'" data-k="'+k+'"'+(lock||full||S.cash<t.fee?' disabled':'')+'>'+(lock?t.role+' · Lv '+t.lv:'Hire '+t.role.toLowerCase()+' · '+money(t.fee))+'</button>';}).join('');
+  return'<div class="label">Farm crew · '+ws.length+' / '+mx+'</div><div class="card">'+(rows?'<ul class="list">'+rows+'</ul>':'<p class="muted">No workers yet. Hire hands to get more plots done by hand each week.</p>')+'<div class="row" style="margin-top:12px">'+hire+'</div><p class="muted" style="margin-top:8px;font-size:13px">Each worker adds hand work every week for a weekly wage. Crew size and better hires unlock as you level up.</p></div>';
+}
+function tabIcon0(n){
+  const p={
+    farms:'<path d="M3 20V10l9-6 9 6v10zM9 20v-6h6v6"/>',
+    land:'<path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/>',
+    crops:'<path d="M12 21V8M12 8c-3-1-4-3-4-5 3 1 4 3 4 5zM12 8c3-1 4-3 4-5-3 1-4 3-4 5zM12 15c-3-1-4-3-4-5M12 15c3-1 4-3 4-5"/>',
+    machines:'<circle cx="7" cy="17" r="3.5"/><circle cx="18" cy="18" r="2.2"/><path d="M9 14V6h6l2 6h3v4"/>',
+    bank:'<path d="M3 10l9-6 9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/>'
+  }[n];
+  return'<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+}
+function sceneSVG(f){
+  const s=season();
+  const P=[
+    {t:'#9CCFE6',b:'#EAF4E2',g:'#86B864',h1:'#7FA878',h2:'#6E9A6A',leaf:'#74B44E'},
+    {t:'#68B3E6',b:'#F7EBC0',g:'#7DAF52',h1:'#6D9E55',h2:'#5C8C4B',leaf:'#3E8E3A'},
+    {t:'#E6A56A',b:'#F7DDB0',g:'#B7A64F',h1:'#A8935A',h2:'#977F4D',leaf:'#D3772B'},
+    {t:'#A9BAC7',b:'#E9EEF1',g:'#E8EDF0',h1:'#CBD5DB',h2:'#B7C3CB',leaf:null}
+  ][s];
+  const st=farmStats(f),n=f.plots.length;
+  const fc=st.ready*2>n?'#D8B24A':st.growing+st.ready>0?'#5E9E48':st.plowed>0?'#7A5636':s===3?'#D9E0E3':'#78A956';
+  const t0=Date.now()%90000;
+  let o=`<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.t}"/><stop offset="1" stop-color="${P.b}"/></linearGradient></defs>`;
+  o+='<rect width="800" height="230" fill="url(#sk)"/>';
+  o+=`<circle cx="650" cy="${s===2?118:s===3?72:58}" r="${s===2?34:28}" fill="${s===3?'#F4F0DA':s===2?'#F5B561':'#FFE27A'}" opacity=".35"/><circle cx="650" cy="${s===2?118:s===3?72:58}" r="${s===2?24:20}" fill="${s===3?'#F4F0DA':s===2?'#F5B561':'#FFE27A'}"/>`;
+  o+=`<g class="cloud" style="animation-delay:-${t0}ms" fill="#fff" opacity="${s===3?.9:.8}"><ellipse cx="170" cy="48" rx="34" ry="11"/><ellipse cx="196" cy="40" rx="22" ry="10"/><ellipse cx="480" cy="72" rx="30" ry="9"/><ellipse cx="502" cy="65" rx="20" ry="9"/></g>`;
+  o+=`<path d="M0 150Q150 92 320 140T640 118T800 138V190H0Z" fill="${P.h2}"/><path d="M0 166Q200 122 420 160T800 150V200H0Z" fill="${P.h1}"/><rect y="172" width="800" height="58" fill="${P.g}"/>`;
+  /* field patch with rows */
+  o+=`<polygon points="430,178 790,178 800,228 400,228" fill="${fc}"/>`;
+  for(let i=1;i<8;i++){const y=178+i*6.2,x1=430-i*4.3,x2=790+i*1.4;o+=`<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(0,0,0,.2)" stroke-width="1.6"/>`;}
+  if(st.growing+st.ready>0&&st.plowed+st.wild<n){for(let i=0;i<7;i++){const y=184+i*6.2,x=440+i*-4;for(let j=0;j<12;j++)o+=`<circle cx="${(x+j*28+(i%2)*10).toFixed(0)}" cy="${y.toFixed(0)}" r="2.2" fill="${st.ready*2>n?'#F2D26B':'#8CCB6B'}"/>`;}}
+  o+='<polygon points="430,178 790,178 800,228 400,228" fill="url(#gp)" opacity=".55"/>';
+  /* trees */
+  const tree=(x,y,sc)=>{
+    let t=`<g transform="translate(${x} ${y}) scale(${sc})"><rect x="-4" y="-34" width="8" height="36" fill="#6B4A2E"/>`;
+    if(P.leaf){t+=`<circle cx="0" cy="-48" r="24" fill="${P.leaf}"/><circle cx="-16" cy="-38" r="16" fill="${P.leaf}"/><circle cx="16" cy="-38" r="16" fill="${P.leaf}"/>`;if(s===0)t+='<circle cx="-8" cy="-52" r="3" fill="#F4C6D6"/><circle cx="10" cy="-46" r="3" fill="#F4C6D6"/><circle cx="-18" cy="-36" r="2.6" fill="#F4C6D6"/>';}
+    else t+='<path d="M0 -34L-14 -58M0 -34L14 -60M0 -44L-8 -66M0 -46L9 -70" stroke="#6B4A2E" stroke-width="3" fill="none"/><path d="M-16 -58h4M12 -60h4M-10 -66h4M7 -70h4" stroke="#fff" stroke-width="3"/>';
+    return t+'</g>';
+  };
+  o+=tree(340,176,.9)+tree(386,180,.7);
+  /* fence */
+  o+='<path d="M0 188H300" stroke="#8B6B45" stroke-width="2.4"/><path d="M0 198H300" stroke="#8B6B45" stroke-width="2.4"/>';
+  for(let x=4;x<300;x+=30)o+=`<rect x="${x}" y="182" width="4" height="22" fill="#7A5C3A"/>`;
+  /* barn */
+  o+='<rect x="52" y="124" width="96" height="54" fill="#B5382A"/><polygon points="44,126 100,90 156,126" fill="#7C2A22"/><rect x="82" y="142" width="36" height="36" fill="#8F2B20" stroke="#F2E8D8" stroke-width="2.4"/><path d="M82 142L118 178M118 142L82 178" stroke="#F2E8D8" stroke-width="2.4"/>';
+  if(s===3)o+='<path d="M48 126L100 93L152 126z" fill="#fff" opacity=".85"/>';
+  if(f.silo)o+='<rect x="164" y="104" width="32" height="74" fill="#C5CCD1"/><path d="M164 104a16 16 0 0 1 32 0z" fill="#9AA5AB"/><path d="M164 124h32M164 144h32M164 162h32" stroke="#A7B0B6" stroke-width="2"/>';
+  if(f.greenhouse)o+='<rect x="210" y="150" width="88" height="28" fill="rgba(205,238,244,.6)" stroke="#6B8E95" stroke-width="2"/><path d="M210 150L254 126L298 150z" fill="rgba(205,238,244,.7)" stroke="#6B8E95" stroke-width="2"/><path d="M232 150V178M254 126V178M276 150V178" stroke="#6B8E95" stroke-width="1.5"/><circle cx="244" cy="166" r="5" fill="#5E9E48"/><circle cx="268" cy="168" r="4" fill="#D8382B"/>';
+  if(f.irrigation)[[520,200],[610,205],[700,200]].forEach((p,i)=>{o+=`<g class="spr" style="animation-delay:-${i*500}ms" stroke="#5FB4E8" stroke-width="2" fill="none" stroke-linecap="round"><path d="M${p[0]} ${p[1]}q-10 -16 -20 -4M${p[0]} ${p[1]}q10 -16 20 -4M${p[0]} ${p[1]}v-14"/></g>`;});
+  /* farmhouse, windmill, hay, crew */
+  o+='<rect x="560" y="142" width="62" height="34" fill="#EFE6D0"/><polygon points="552,144 591,114 630,144" fill="#6B3B2A"/><rect x="584" y="154" width="14" height="22" fill="#7A4A2E"/><rect x="566" y="152" width="12" height="11" fill="#9FD3E6" stroke="#fff"/><rect x="604" y="152" width="12" height="11" fill="#9FD3E6" stroke="#fff"/><rect x="608" y="118" width="7" height="16" fill="#8E5A44"/>';
+  o+='<polygon points="706,176 724,176 719,122 711,122" fill="#E9E1D0"/><g class="wm" style="transform-origin:715px 120px"><path d="M715 120V82M715 120H753M715 120V158M715 120H677" stroke="#F4EEDF" stroke-width="5" stroke-linecap="round"/></g><circle cx="715" cy="120" r="4" fill="#8E5A44"/>';
+  o+='<ellipse cx="320" cy="184" rx="13" ry="10" fill="#D8B24A" stroke="#A8832B"/><ellipse cx="320" cy="184" rx="7" ry="5" fill="none" stroke="#A8832B"/>';
+  wk(f).forEach((w,i)=>{o+='<g transform="translate('+(446+i*44)+' '+(150+(i%2)*14)+') scale(.62)">'+person(w)+'</g>';});
+  let ai=0;
+  Object.keys(ANIM).forEach(k=>{const c=Math.min(5,an(f)[k]||0);for(let j=0;j<c;j++){o+='<g transform="translate('+(432+ai*21)+' '+(206+(ai%2)*5)+') scale(.42)"><g class="bob" style="animation-delay:-'+(ai*260)+'ms">'+AA[k]+'</g></g>';ai++;}});
+  if(f.shed)o+='<path d="M4 192L74 166L144 192z" fill="#8B5A3C"/><path d="M4 192H144" stroke="#5C3A25" stroke-width="3"/><rect x="10" y="192" width="4" height="36" fill="#6B4630"/><rect x="134" y="192" width="4" height="36" fill="#6B4630"/>';
+  if(f.scarecrow)o+='<g transform="translate(380 150)"><rect x="-1.5" y="-4" width="3" height="34" fill="#7A4A2E"/><path d="M-16 6H16" stroke="#7A4A2E" stroke-width="3" stroke-linecap="round"/><circle cy="-8" r="7" fill="#E8CF8E"/><path d="M-10 -12H10L0 -26z" fill="#8B5A3C"/><path d="M-8 6L-14 22M8 6L14 22" stroke="#C9A24A" stroke-width="2"/></g>';
+  /* machines working here */
+  const mine=S.vehicles.filter(v=>v.farm===f.id);
+  mine.forEach((v,i)=>{o+=`<svg x="${14+i*64}" y="188" width="62" height="38" viewBox="0 0 80 48"><g class="bob" style="animation-delay:-${i*400}ms">${vehInner(v.type)}</g></svg>`;});
+  /* snow */
+  if(s===3){for(let i=0;i<14;i++){o+=`<circle class="flake" style="animation-delay:-${(i*530+t0)%7000}ms" cx="${30+i*55}" cy="${(i*37)%60}" r="2.2" fill="#fff"/>`;}}
+  const wxn=(S.wx&&S.wx.now)||'sun';
+  if(wxn==='cloud'||wxn==='rain')o+='<g fill="'+(wxn==='rain'?'#9DA9B3':'#C3CDD4')+'" opacity=".93"><ellipse cx="180" cy="38" rx="62" ry="18"/><ellipse cx="232" cy="30" rx="40" ry="16"/><ellipse cx="520" cy="48" rx="72" ry="20"/><ellipse cx="582" cy="38" rx="44" ry="16"/></g>';
+  if(wxn==='rain')for(let i=0;i<30;i++){const x=(i*29+11)%800;o+='<line class="drop" style="animation-delay:-'+((i*137)%900)+'ms" x1="'+x+'" y1="0" x2="'+(x-4)+'" y2="14" stroke="#8FC4E8" stroke-width="1.6" stroke-linecap="round"/>';}
+  if(wxn==='dry')o+='<rect width="800" height="230" fill="#FF9A2E" opacity=".16"/>';
+  o+='<rect width="800" height="230" fill="#0A1020" style="opacity:var(--dim)"/>';
+  return'<svg class="scene" viewBox="0 0 800 230" role="img" aria-label="'+esc(f.name)+' in '+SEASON_NAMES[s].toLowerCase()+'">'+o+'</svg>';
+}
+function parcelThumb(l){
+  const cols=Math.min(10,Math.ceil(Math.sqrt(l.plots*1.8))),rows=Math.ceil(l.plots/cols);
+  const q=clamp((l.soil-.8)/.55,0,1),soilc='hsl(28 '+Math.round(32+q*10)+'% '+Math.round(52-q*22)+'%)';
+  const cw=Math.min(24,Math.floor(200/cols)),ch=Math.min(13,Math.floor(56/rows));
+  const w=cols*cw,x0=300-w-14;
+  let o='<rect width="300" height="110" fill="#CFE6EE"/><path d="M0 60Q80 34 160 56T300 50V80H0Z" fill="#8BB27A"/><rect y="70" width="300" height="40" fill="#86B864"/>';
+  for(let i=0;i<l.plots;i++){const c=i%cols,r=Math.floor(i/cols);o+=`<rect x="${x0+c*cw}" y="${60+r*(ch+1)}" width="${cw-1.5}" height="${ch}" rx="1.5" fill="${soilc}" stroke="rgba(0,0,0,.18)"/>`;}
+  o+='<rect x="18" y="52" width="46" height="30" fill="#B5382A"/><polygon points="13,54 41,34 69,54" fill="#7C2A22"/><rect x="32" y="62" width="18" height="20" fill="#8F2B20" stroke="#F2E8D8" stroke-width="1.4"/>';
+  if(l.silo)o+='<rect x="70" y="44" width="16" height="38" fill="#C5CCD1"/><path d="M70 44a8 8 0 0 1 16 0z" fill="#9AA5AB"/>';
+  if(l.greenhouse)o+='<rect x="92" y="66" width="44" height="16" fill="rgba(205,238,244,.7)" stroke="#6B8E95" stroke-width="1.4"/><path d="M92 66L114 54L136 66z" fill="rgba(205,238,244,.8)" stroke="#6B8E95" stroke-width="1.4"/>';
+  if(l.irrigation)o+='<g stroke="#5FB4E8" stroke-width="1.6" fill="none"><path d="M150 92q-6 -10 -12 -2M150 92q6 -10 12 -2"/></g>';
+  return'<svg viewBox="0 0 300 110" aria-hidden="true">'+o+'</svg>';
+}
+
+/* ---------- renderers ---------- */
+function renderBand(){
+  const s=season(),nw=netWorth(),done=S.goalIdx>=GOALS.length,goal=GOALS[Math.min(S.goalIdx,GOALS.length-1)];
+  document.documentElement.dataset.season=s;
+  const cur=S.week%48;
+  const groups=SEASON_NAMES.map((n,gi)=>{
+    let t='';
+    for(let i=0;i<12;i++){const idx=gi*12+i;t+='<i class="'+(idx<cur?'past':idx===cur?'now':'')+'"></i>';}
+    return'<div class="sg"><div class="ticks">'+t+'</div><span>'+n+(gi===3?' · frost':'')+'</span></div>';
+  }).join('');
+  const nxt=s===3?'Spring in '+weeksToSpring()+' wk':'Frost in '+weeksToWinter()+' wk';
+  const pct=done?100:clamp(nw/goal*100,0,100);
+  const cap=capacity(),used=Math.floor(stored());
+  $('#band').innerHTML='<div class="wrap"><div class="band-grid'+(UI.bandOpen?' open':'')+'"><div>'+
+    '<div class="eyebrow">Year '+yearNo()+'</div>'+wxLine()+
+    '<h1 class="season">'+SEASON_NAMES[s]+'<span class="wk">week '+wkIn()+' of 12</span></h1>'+
+    '<div class="strip" aria-label="Calendar of the year">'+groups+'</div><div class="next">'+nxt+'</div></div>'+
+    '<div><div class="stats">'+
+    '<div class="stat"><small>'+ic('coin')+'Cash</small><b>'+(S.free?'∞ unlimited':money(S.cash))+'</b></div>'+
+    '<div class="stat"><small>'+ic('chart')+'Net worth</small><b>'+(S.free?'∞':money(nw))+'</b></div>'+
+    '<div class="stat sec"><small>'+ic('silo')+'Stored crops</small><b>'+money(stockValue())+'</b><em>'+used+' / '+cap+' units</em></div>'+
+    '<div class="stat sec"><small>'+ic('bank')+'Loan</small><b>'+money(S.loan)+'</b></div></div>'+
+    lvBlock()+'<div class="goal">'+(done?'All goals reached. Keep building.':'Goal: '+money(goal)+' net worth')+'<div class="gbar"><i style="width:'+pct.toFixed(1)+'%"></i></div></div><button type="button" class="bandtog" data-a="band">'+(UI.bandOpen?'Hide details ▴':'Calendar, level, loan ▾')+'</button></div></div></div>';
+}
+function renderTabs(){
+  const tabs=[['farms','Farms'],['land','Land market'],['crops','Crops'],['machines','Machinery'],['contracts','Contracts'],['bank','Bank']];
+  const ready=S.farms.reduce((a,f)=>a+farmStats(f).ready,0);
+  $('#tabs').innerHTML='<div class="wrap" role="tablist">'+tabs.map(t=>{
+    const cr=t[0]==='contracts'&&S.contracts?S.contracts.filter(c=>S.stock[c.crop]>=c.qty).length:0;const badge=(t[0]==='farms'&&ready)?'<span class="dot">'+ready+'</span>':cr?'<span class="dot">'+cr+'</span>':'';
+    return'<button class="tab" role="tab" aria-selected="'+(S.ui.tab===t[0])+'" data-a="tab" data-id="'+t[0]+'">'+tabIcon(t[0])+t[1]+badge+'</button>';
+  }).join('')+'</div>';
+}
+function renderDock(){
+  const s=season();
+  $('#dock').innerHTML='<div class="wrap"><div class="dock-info"><small>'+SEASON_NAMES[s]+' · wk '+wkIn()+'</small><b>'+(S.free?'∞':money(S.cash))+'</b></div>'+
+    '<div class="dock-btns"><button class="btn" data-a="auto" aria-pressed="'+UI.auto+'">'+(UI.auto?'Pause':'Auto')+'</button>'+
+    '<button class="btn" data-a="speed" aria-label="Auto speed">'+S.ui.speed+'×</button>'+
+    '<button class="btn primary" data-a="next"'+(S.over?' disabled':'')+'>Next week</button></div></div>';
+}
+function nextStep(f){
+  const st=farmStats(f);
+  const mT=farmHas(f,'tractor'),mS=farmHas(f,'seeder'),mH=farmHas(f,'harvester');
+  if(st.ready)return{msg:'Crops are ready. Run Harvest in the field work panel'+(mH?', and your combine will clear every ready plot.':'. A combine harvester would clear them all at once.')};
+  if(st.wild)return{msg:'The ground is untouched. Run Plough first'+(mT?', and your tractor will take the whole farm in one pass.':'. By hand you can do '+f.hand+' plots this week; a tractor does every plot at once.'),btn:mT||S.vehicles.some(v=>v.type==='tractor'&&!v.farm)?null:['Open Machinery','machines']};
+  if(st.plowed)return{msg:'The soil is ploughed. Pick a crop below, then run Sow'+(mS?' and your seed drill will plant every plot.':'.')};
+  if(st.growing)return{msg:'Your crops are growing. Press "Next week" at the bottom of the screen to move time forward.'};
+  return{msg:'Press "Next week" to move on.'};
+}
+function jobCard(f,j){
+  const J=JOBS[j],V=VEH[J.veh],idx=jobIdx(f,j),n=idx.length,mach=farmHas(f,J.veh);
+  const crop=CROPS[S.ui.crop].name.toLowerCase();
+  const what={plough:plural(n,'wild plot'),sow:plural(n,'ploughed plot')+' ready for '+crop,spray:plural(n,'growing plot'),harvest:plural(n,'plot')+' ready'}[j];
+  let sub,btn,extra='';
+  if(mach){
+    sub=V.name+' working here · fuel '+money(J.fuel*n);
+    btn=`<button class="btn primary sm" data-a="job" data-job="${j}" data-id="${f.id}"${(n&&!(j==='sow'&&S.cash<seedCost(S.ui.crop,f)))?'':' disabled'}>${J.name} all (${n})</button>`;
+  }else{
+    const can=Math.min(n,f.hand);
+    sub=j==='spray'?'Needs a sprayer working here':'By hand · '+f.hand+' hand work left';
+    btn=j==='spray'?'':`<button class="btn sm" data-a="job" data-job="${j}" data-id="${f.id}"${(can&&!(j==='sow'&&S.cash<seedCost(S.ui.crop,f)))?'':' disabled'}>${J.name} by hand (${can})</button>`;
+    const idle=S.vehicles.find(v=>v.type===J.veh&&!v.farm);
+    extra=idle?`<button class="btn sm primary" data-a="deploy" data-id="${idle.id}" data-farm="${f.id}">Deploy ${V.name.toLowerCase()} here</button>`:`<button class="btn sm" data-a="tab" data-id="machines">Buy ${V.name.toLowerCase()} · ${money(V.price)}</button>`;
+  }
+  return`<div class="job${mach?' has':' idle'}"><div class="jv">${vehSVG(J.veh)}</div><div class="jt"><b>${J.name}</b><span class="jm">${sub}</span><span class="muted">${what}</span></div><div class="ja">${btn}${extra}</div></div>`;
+}
+function renderFarms(){
+  if(!S.farms.length){
+    return'<div class="card over"><h2 class="h2">You have no farm yet</h2><p class="muted">Here is the whole game in 3 steps:</p><ol class="steps"><li><span><b>Buy a farm</b> in the Land market with your $12,000.</span></li><li><span><b>Plough, then sow</b> a crop. Tap the buttons, or tap the plots.</span></li><li><span>Press <b>Next week</b> until crops are ready. <b>Harvest</b>, then sell in the Crops tab.</span></li></ol><button class="btn primary" data-a="tab" data-id="land">Buy your first farm</button></div>';
+  }
+  const f=S.farms.find(x=>x.id===S.ui.farm)||S.farms[0];
+  S.ui.farm=f.id;
+  const st=farmStats(f);
+  const list=S.farms.map(x=>{
+    const s=farmStats(x);
+    return'<button class="fli'+(x.id===f.id?' sel':'')+'" data-a="farm" data-id="'+x.id+'" aria-pressed="'+(x.id===f.id)+'"><b>'+esc(x.name)+'</b><span class="mono">'+x.plots.length+' plots'+(s.ready?' · <em class="rdy">'+s.ready+' ready</em>':'')+'</span></button>';
+  }).join('');
+  const tags='<span class="tag">Soil '+soilWord(f.soil).toLowerCase()+' ×'+f.soil.toFixed(2)+'</span>'+
+    Object.keys(UPG).map(k=>f[k]?'<span class="tag on">'+UPG[k].name+'</span>':'').join('')+(f.manager?'<span class="tag on">Manager</span>':'')+(f.auto?'<span class="tag on">Autopilot</span>':'')+(sprayed(f)?'<span class="tag on">Sprayed · '+(f.sprayUntil-S.week)+' wk</span>':'');
+  const chips=CROP_KEYS.map(k=>{
+    const c=CROPS[k],s=plantStatus(f,k),sel=S.ui.crop===k;
+    return'<button class="chip'+(sel?' sel':'')+'" style="--c:'+colr(k)+'" data-a="crop" data-id="'+k+'" aria-pressed="'+sel+'">'+cropIcon(k)+'<b>'+c.name+'</b><span class="cm">'+money(seedCost(k,f))+'/plot · '+c.grow+' wk</span><span class="cs '+s.cls+'">'+s.label+'</span></button>';
+  }).join('');
+  const plots=f.plots.map((pl,i)=>{
+    const sel=S.ui.plot&&S.ui.plot.f===f.id&&S.ui.plot.i===i;
+    if(pl.s===0)return'<button class="plot" data-s="0" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', wild ground. Plough by hand">'+plotSVG(pl)+'</button>';
+    if(pl.s===1)return'<button class="plot" data-s="1" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', ploughed. Sow '+CROPS[S.ui.crop].name+' by hand">'+plotSVG(pl)+'<span class="pl">Sow</span></button>';
+    const ready=pl.p>=pl.need,pct=Math.round(pl.p/pl.need*100),left=Math.max(0,Math.ceil((pl.need-pl.p)/growSpeed(f)));
+    return'<button class="plot'+(sel?' picked':'')+'" data-s="'+(ready?'ready':'growing')+'" data-a="plot" data-id="'+f.id+'" data-i="'+i+'" aria-label="Plot '+(i+1)+', '+CROPS[pl.crop].name+', '+(ready?'ready to harvest':left+' weeks left')+'">'+plotSVG(pl)+'<span class="pl">'+(ready?'Harvest':left+' wk')+'</span><span class="pb"><i style="width:'+pct+'%"></i></span></button>';
+  }).join('');
+  const sp=S.ui.plot&&S.ui.plot.f===f.id?f.plots[S.ui.plot.i]:null;
+  let pinfo='';
+  if(sp&&sp.s===2&&sp.p<sp.need){
+    const i=S.ui.plot.i,asking=UI.confirm===ck('clearPlot',f.id,i);
+    pinfo='<div class="pinfo"><span class="mono">Plot '+(i+1)+' · '+CROPS[sp.crop].name+' · '+Math.floor(sp.p)+' of '+sp.need+' weeks · about '+Math.round(CROPS[sp.crop].yield*f.soil)+' units</span>'+
+      '<button class="btn danger sm'+(asking?' ask':'')+'" data-a="clearPlot" data-id="'+f.id+'" data-i="'+i+'">'+(asking?'Confirm: lose this crop':'Plough under')+'</button></div>';
+  }
+  let drive='';
+  const el=animLeft();
+  if(UI.anim&&UI.anim.farm===f.id&&UI.anim.job&&el<1800){
+    drive='<div class="drive" aria-hidden="true" style="--dc:'+JOBS[UI.anim.job].color+'"><i class="sweep" style="animation-delay:-'+el+'ms"></i><span class="dsp" style="animation-delay:-'+el+'ms">'+vehSVG(UI.anim.t)+'</span></div>';
+  }
+  const emptyCost=st.plowed*seedCost(S.ui.crop,f);
+  const jobs=JOB_KEYS.map(j=>jobCard(f,j)).join('');
+  const upg=Object.keys(UPG).map(k=>{
+    const u=UPG[k];
+    return'<li><div><b>'+u.name+'</b><p>'+u.desc+'</p></div>'+(f[k]?'<span class="tag on">Installed</span>':'<button class="btn sm" data-a="upg" data-id="'+f.id+'" data-k="'+k+'"'+(S.cash<u.cost?' disabled':'')+'>Install '+money(u.cost)+'</button>')+'</li>';
+  }).join('');
+  const here=S.vehicles.filter(v=>v.farm===f.id),idle=S.vehicles.filter(v=>!v.farm&&!farmHas(f,v.type));
+  const mrows=here.map(v=>'<li class="vr"><div class="vthumb">'+vehSVG(v.type)+'</div><div><b>'+VEH[v.type].name+' <span class="tag on">Working here</span></b><p>'+VEH[v.type].desc+'</p></div><button class="btn sm" data-a="deploy" data-id="'+v.id+'" data-farm="">Return to garage</button></li>').join('')+
+    idle.map(v=>'<li class="vr"><div class="vthumb">'+vehSVG(v.type)+'</div><div><b>'+VEH[v.type].name+' <span class="tag">In garage</span></b><p>'+VEH[v.type].desc+'</p></div><button class="btn sm primary" data-a="deploy" data-id="'+v.id+'" data-farm="'+f.id+'">Deploy here</button></li>').join('');
+  const mach='<div class="label">Machinery for this farm</div><div class="card">'+(mrows?'<ul class="list">'+mrows+'</ul>':'<p class="muted">You own no machines yet. Buy them in the Machinery tab, then deploy them here. A machine only works on the farm it is deployed to.</p>')+'</div>';
+  const expCost=Math.round(4*1200*f.soil);
+  const asking=UI.confirm===ck('sellFarm',f.id);
+  const ns=nextStep(f);
+  const qj=st.ready?'harvest':st.wild?'plough':st.plowed?'sow':null;
+  let qbtn='';
+  if(qj){const J=JOBS[qj],n=jobIdx(f,qj).length,m=farmHas(f,J.veh),c=m?n:Math.min(n,f.hand),bad=!c||(qj==='sow'&&S.cash<seedCost(S.ui.crop,f));
+    qbtn='<button class="btn primary" data-a="job" data-job="'+qj+'" data-id="'+f.id+'"'+(bad?' disabled':'')+'>'+J.name+(m?' all':' by hand')+' ('+c+')</button>';
+    if(!m&&f.hand<=0&&n>0){qbtn='<button class="btn primary" data-a="next">Next week →</button>';ns.msg='You used all your hand work for this week. Press Next week to get it back, or deploy a machine to skip the limit. Next up: '+J.name.toLowerCase()+'.';}}
+  const hint='<div class="card intro"><div><b>What to do now</b><p class="muted">'+ns.msg+'</p></div><div class="row">'+qbtn+(ns.btn?'<button class="btn sm" data-a="tab" data-id="'+ns.btn[1]+'">'+ns.btn[0]+'</button>':'')+'</div></div>';
+  const hand='<div class="hand"><span>Hand work left on this farm this week</span><b class="mono">'+f.hand+' / '+handMax(f)+'</b><div class="bar"><i style="width:'+(f.hand/handMax(f)*100)+'%"></i></div></div>';
+  return hint+'<div class="farm-layout"><div class="farm-list" aria-label="Your farms">'+list+'</div><div>'+
+    sceneSVG(f)+
+    '<div class="farm-head"><h2>'+esc(f.name)+'</h2><div class="farm-meta">'+f.plots.length+' plots · '+st.wild+' wild · '+st.plowed+' ploughed · '+st.growing+' growing · '+st.ready+' ready</div><div class="row">'+tags+'</div></div>'+
+    '<div class="label">Field work</div>'+hand+'<div class="jobs">'+jobs+'</div>'+
+    '<div class="label">Crop to sow</div><div class="chips">'+chips+'</div>'+
+    '<div class="label">Plots · tap a plot to work it by hand</div><div class="legend"><span>🟩 Wild</span><span>🟫 Ploughed</span><span>🌱 Growing</span><span class="rp">✨ Ripe: harvest it</span></div><div class="field wx-'+((S.wx&&S.wx.now)||'sun')+'"><div class="plots">'+plots+'</div>'+drive+'</div>'+pinfo+mach+crewCard(f)+animalCard(f)+
+    '<div class="label">Improvements</div><div class="card"><ul class="list">'+upg+
+    '<li><div><b>Add 4 plots</b><p>Expands this farm to '+(f.plots.length+4)+' plots. New plots start as wild ground.</p></div><button class="btn sm" data-a="upg" data-id="'+f.id+'" data-k="expand"'+(S.cash<expCost||f.plots.length>=40?' disabled':'')+'>'+(f.plots.length>=40?'Maximum size':'Expand '+money(expCost))+'</button></li>'+
+    '<li><div><b>Farm manager</b><p>Each week harvests, ploughs, sows the best crop for the season and sprays, using your deployed machines plus '+MGR_HAND+' plots of hand work. Wage '+money(mgrWage(f))+' a week.</p></div><button class="btn sm'+(f.manager?'':' primary')+'" data-a="mgr" data-id="'+f.id+'">'+(f.manager?'Dismiss':'Hire')+'</button></li>'+
+    '<li><div><b>Autopilot (free)</b><p>Each week it harvests, ploughs and sows the best crop by itself, using your deployed machines and your own '+handMax(f)+' hand work. No wage.</p></div><button class="btn sm'+(f.auto?'':' primary')+'" data-a="autop" data-id="'+f.id+'">'+(f.auto?'Turn off':'Turn on')+'</button></li>'+
+    '<li><div><b>Sell this farm</b><p>You would receive '+money(farmSell(f))+' (land, improvements and fees included). Machines working here go back to the garage.</p></div><button class="btn danger sm'+(asking?' ask':'')+'" data-a="sellFarm" data-id="'+f.id+'">'+(asking?'Confirm sale':'Sell farm')+'</button></li></ul></div>'+
+    '</div></div>';
+}
+function renderLand(){
+  const idx=Math.round((S.landIndex-1)*100);
+  const cards=S.listings.map(l=>{
+    const up=25+2*l.plots+(l.greenhouse?10:0),est=Math.round(l.plots*l.soil*40-up);
+    const tags=(l.greenhouse?'<span class="tag on">Greenhouse</span>':'')+(l.irrigation?'<span class="tag on">Irrigation</span>':'')+(l.silo?'<span class="tag on">Silo</span>':'')||'<span class="tag">No improvements</span>';
+    return'<article class="card land"><div class="thumb">'+parcelThumb(l)+'</div><header><h3>'+esc(l.name)+'</h3><span class="price">'+money(l.price)+'</span></header>'+
+      '<dl class="kv"><dt>Plots</dt><dd>'+l.plots+'</dd><dt>Soil</dt><dd>'+soilWord(l.soil)+' ×'+l.soil.toFixed(2)+'</dd><dt>Upkeep</dt><dd>'+money(up)+'/wk</dd><dt>Rough net if fully sown</dt><dd>'+money(est)+'/wk</dd></dl>'+
+      '<div class="tags">'+tags+'</div><div class="row"><button class="btn primary" data-a="buyFarm" data-id="'+l.id+'"'+(S.cash<l.price?' disabled':'')+'>Buy farm</button></div></article>';
+  }).join('');
+  return'<div class="sec-head"><h2>Farms for sale</h2><p class="muted">Land prices are '+(idx>=0?'up ':'down ')+Math.abs(idx)+'% since you started. New listings appear every 4 weeks. Rich soil raises every harvest. Bought land is wild ground, so it needs ploughing before you sow.</p></div><div class="grid">'+cards+'</div>';
+}
+function sigTag(k,p){
+  const h=S.market[k].hist;if(h.length<4)return'';
+  const r=p/(h.reduce((a,b)=>a+b,0)/h.length);
+  return r>=1.08?'<span class="tag gold">Good time to sell</span>':r<=.92?'<span class="tag">Price is low · hold</span>':'';
+}
+function ordRow(k,p){
+  const o=S.orders&&S.orders[k];
+  if(!o)return'<div class="ord"><span>Sell target</span><button class="btn sm" data-a="ordSet" data-id="'+k+'">Set auto-sell</button></div>';
+  return'<div class="ord on"><span>Auto-sell all at <b class="mono">'+money2(o.t)+'</b> or more</span><span class="ordb"><button class="btn sm" data-a="ordT" data-id="'+k+'" data-d="-1" aria-label="Lower target">−</button><button class="btn sm" data-a="ordT" data-id="'+k+'" data-d="1" aria-label="Raise target">+</button><button class="btn sm" data-a="ordOff" data-id="'+k+'">Cancel</button></span></div>';
+}
+function runOrders(){
+  S.orders=S.orders||{};
+  CROP_KEYS.forEach(k=>{const o=S.orders[k];if(!o||S.stock[k]<1)return;if(price(k)>=o.t){const q=Math.floor(S.stock[k]),rev=sell(k,q);if(rev)log('Target hit: sold '+q+' '+CROPS[k].name.toLowerCase()+' for '+money(rev)+'.','good');}});
+}
+function renderCrops(){
+  const cap=capacity(),used=Math.floor(stored());
+  const el=animLeft(),go=UI.anim&&UI.anim.tab==='crops'&&el<1800,has=deployed('truck');
+  const road='<div class="road">'+(has?'<span class="dsp'+(go?' go':'')+'"'+(go?' style="animation-delay:-'+el+'ms"':'')+'>'+vehSVG('truck')+'</span><span class="tx">Truck deployed · +10% on every sale</span>':'<span class="tx">No truck deployed. Sales get the plain market price.</span>')+'</div>';
+  const cards=CROP_KEYS.map(k=>{
+    const c=CROPS[k],m=S.market[k],p=price(k),n=m.hist.length;
+    const chg=n>1?(m.hist[n-1]/m.hist[n-2]-1)*100:0,units=Math.floor(S.stock[k]);
+    let pk=0;c.seasonal.forEach((v,i)=>{if(v>c.seasonal[pk])pk=i;});
+    const tags=(m.boom>0?'<span class="tag gold">Demand surge · '+m.boom+' wk</span>':'')+(m.impact<.93?'<span class="tag">Market saturated</span>':'')+sigTag(k,p)||'';
+    return'<article class="card crop" style="--c:'+colr(k)+'"><header>'+cropIcon(k)+'<h3>'+c.name+'</h3><span class="price">'+money2(p)+'</span></header>'+
+      '<div class="pricerow"><span class="chg '+(chg>=0?'up':'dn')+'">'+(chg>=0?'▲ ':'▼ ')+Math.abs(chg).toFixed(1)+'% this week</span>'+spark(m.hist)+'</div>'+
+      '<dl class="kv"><dt>In storage</dt><dd>'+units+' units</dd><dt>Worth</dt><dd>'+money(units*p)+'</dd><dt>Spoils</dt><dd>'+(c.spoil?Math.round(c.spoil*1000)/10+'% a week':'Never')+'</dd><dt>Peak demand</dt><dd>'+SEASON_NAMES[pk]+'</dd></dl>'+
+      (tags?'<div class="tags">'+tags+'</div>':'')+ordRow(k,p)+
+      '<div class="row"><button class="btn sm" data-a="sellCrop" data-id="'+k+'" data-pct="25"'+(units?'':' disabled')+'>Sell 25%</button><button class="btn sm" data-a="sellCrop" data-id="'+k+'" data-pct="50"'+(units?'':' disabled')+'>Sell 50%</button><button class="btn sm primary" data-a="sellCrop" data-id="'+k+'" data-pct="100"'+(units?'':' disabled')+'>Sell all</button></div></article>';
+  }).join('');
+  return'<div class="sec-head"><h2>Crop market</h2><p class="muted">Prices move every week and follow the seasons. Selling a lot at once pushes the price down for a few weeks.</p></div>'+
+    '<div class="card store"><div class="row" style="justify-content:space-between"><b>Storage</b><span class="mono">'+used+' / '+cap+' units</span></div><div class="bar"><i style="width:'+(cap?Math.min(100,used/cap*100):0).toFixed(1)+'%"></i></div>'+road+
+    '<p class="muted">Harvests that do not fit are sold at once for 70% of the market price. Silos and a grain trailer add room.</p>'+
+    '<div class="row"><button class="btn primary" data-a="sellAll"'+(used?'':' disabled')+'>Sell everything (about '+money(stockValue())+')</button></div></div>'+
+    '<div class="grid">'+cards+'</div>';
+}
+function deployControls(v){
+  const cur=v.farm?S.farms.find(x=>x.id===v.farm):null;
+  const btns=S.farms.map(f=>{
+    const here=!!cur&&cur.id===f.id,taken=!here&&farmHas(f,v.type);
+    return'<button class="btn sm'+(here?' primary':'')+'" data-a="deploy" data-id="'+v.id+'" data-farm="'+(here?'':f.id)+'"'+(taken?' disabled':'')+' aria-pressed="'+here+'">'+esc(f.name)+(taken?' (has one)':'')+'</button>';
+  }).join('');
+  return'<div class="label" style="margin:12px 0 6px">'+(cur?'Working at '+esc(cur.name):'In the garage, not working')+'</div><div class="row">'+
+    (btns||'<span class="muted" style="font-size:13px">Buy a farm first, then deploy this machine to it.</span>')+
+    (cur?'<button class="btn sm" data-a="deploy" data-id="'+v.id+'" data-farm="">To garage</button>':'')+'</div>';
+}
+function renderMachines(){
+  const owned=S.vehicles.map(v=>{
+    const asking=UI.confirm===ck('sellVeh',v.id),V=VEH[v.type];
+    return'<article class="card veh"><div class="vh"><div class="vsp">'+vehSVG(v.type)+'</div><div><h3>'+V.name+'</h3><p>'+V.desc+'</p></div></div>'+
+      '<dl class="kv"><dt>Age</dt><dd>'+Math.floor(v.age)+' wk</dd><dt>Worth</dt><dd>'+money(depVal(v.type,v.age))+'</dd><dt>Upkeep</dt><dd>'+money(V.price*.0025)+'/wk</dd></dl>'+
+      deployControls(v)+
+      '<div class="row"><button class="btn danger sm'+(asking?' ask':'')+'" data-a="sellVeh" data-id="'+v.id+'">'+(asking?'Confirm sale '+money(vehSell(v)):'Sell for '+money(vehSell(v)))+'</button></div></article>';
+  }).join('');
+  const shop=VEH_KEYS.map(t=>{
+    const V=VEH[t],n=S.vehicles.filter(v=>v.type===t).length;
+    return'<article class="card veh"><div class="vh"><div class="vsp">'+vehSVG(t)+'</div><div><h3>'+V.name+'</h3><p>'+V.desc+'</p></div></div>'+
+      '<dl class="kv"><dt>New price</dt><dd>'+money(V.price)+'</dd><dt>Upkeep</dt><dd>'+money(V.price*.0025)+'/wk</dd><dt>You own</dt><dd>'+n+'</dd></dl>'+
+      '<div class="row"><button class="btn primary sm" data-a="buyVeh" data-id="'+t+'"'+(S.cash<V.price||lvl()<VEH_LV[t]?' disabled':'')+'>'+(lvl()<VEH_LV[t]?'Unlocks at level '+VEH_LV[t]:'Buy new')+'</button></div></article>';
+  }).join('');
+  const used=S.used.map(u=>{
+    const V=VEH[u.type];
+    return'<article class="card veh"><div class="vh"><div class="vsp">'+vehSVG(u.type)+'</div><div><h3>'+V.name+'</h3><p>'+V.desc+'</p></div></div>'+
+      '<dl class="kv"><dt>Age</dt><dd>'+u.age+' wk</dd><dt>Asking price</dt><dd>'+money(u.price)+'</dd></dl>'+
+      '<div class="row"><button class="btn primary sm" data-a="buyUsed" data-id="'+u.id+'"'+(S.cash<u.price?' disabled':'')+'>Buy used</button></div></article>';
+  }).join('');
+  return'<div class="sec-head"><h2>Machinery</h2><p class="muted">By hand you can work '+HAND+' plots a week on each farm. A deployed machine does its whole job in one pass on every plot, for a little fuel. It only works on the farm you send it to, and each farm takes one of each type. Machines in the garage still cost upkeep.</p></div>'+
+    '<h3 class="sub">Your machines</h3>'+(owned?'<div class="grid">'+owned+'</div>':'<p class="muted">You own no machines yet. Buy one below.</p>')+
+    '<h3 class="sub">Used lot <span class="muted" style="font:400 13px var(--f-mono)">refreshes every 6 weeks</span></h3>'+(used?'<div class="grid">'+used+'</div>':'<p class="muted">Nothing on the used lot right now.</p>')+
+    '<h3 class="sub">Dealership</h3><div class="grid">'+shop+'</div>';
+}
+function renderBank(){
+  return'<div class="card"><h3>Sandbox mode</h3><p class="muted">'+(S.free?'Unlimited money is ON. Buy anything and try every tool. Turn it off to return to normal play with $20,000.':'Want to try everything without worrying about cost? Turn on unlimited money. You can turn it off any time.')+'</p><div class="row"><button class="btn sm '+(S.free?'danger':'primary')+'" data-a="free">'+(S.free?'Turn off unlimited money':'Turn on unlimited money')+'</button></div></div>'+renderBank0();
+}
+function renderBank0(){
+  const lim=creditLimit(),room=Math.max(0,lim-S.loan),c=weeklyCosts();
+  const rows=S.ledger.map(r=>{const net=r.income-r.expense;return'<tr><td>Week '+r.w+'</td><td>'+money(r.income)+'</td><td>'+money(r.expense)+'</td><td class="'+(net>=0?'pos':'neg')+'">'+money(net)+'</td></tr>';}).join('');
+  const news=S.log.slice(0,25).map(e=>'<li class="k-'+e.kind+'"><span class="mono">Wk '+e.w+'</span><span>'+esc(e.text)+'</span></li>').join('');
+  const asking=UI.confirm===ck('newGame');
+  return'<div class="sec-head"><h2>Bank and books</h2></div><div class="two">'+
+    '<div class="card"><h3>Loan</h3><dl class="kv" style="margin:10px 0 12px"><dt>Borrowed</dt><dd>'+money(S.loan)+'</dd><dt>Credit limit</dt><dd>'+money(lim)+'</dd><dt>Interest</dt><dd>0.3% a week</dd></dl>'+
+    '<div class="row"><button class="btn sm" data-a="borrow" data-amt="1000"'+(room<1000?' disabled':'')+'>Borrow $1,000</button><button class="btn sm" data-a="borrow" data-amt="5000"'+(room<5000?' disabled':'')+'>Borrow $5,000</button></div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn sm" data-a="repay" data-amt="1000"'+(S.loan<1?' disabled':'')+'>Repay $1,000</button><button class="btn sm" data-a="repay" data-amt="all"'+(S.loan<1?' disabled':'')+'>Repay all</button></div>'+
+    '<p class="muted" style="margin-top:10px;font-size:13px">If your cash falls below −$15,000 the bank closes you down.</p></div>'+
+    '<div class="card"><h3>Fixed costs next week</h3><dl class="kv" style="margin-top:10px"><dt>Land upkeep</dt><dd>'+money(c.land)+'</dd><dt>Wages</dt><dd>'+money(c.wages)+'</dd><dt>Machinery upkeep</dt><dd>'+money(c.mach)+'</dd><dt>Loan interest</dt><dd>'+money(c.interest)+'</dd><dt>Overdraft interest</dt><dd>'+money(c.over)+'</dd><dt><b>Total</b></dt><dd><b>'+money(c.total)+'</b></dd></dl></div></div>'+
+    '<div class="card" style="margin-top:12px"><h3>Net worth</h3><div style="margin-top:8px">'+chart()+'</div></div>'+
+    '<div class="two" style="margin-top:12px"><div class="card"><h3>Last 12 weeks</h3><div class="tablewrap" style="margin-top:6px"><table><thead><tr><th>Week</th><th>Sales</th><th>Costs</th><th>Net</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="muted">No weeks played yet.</td></tr>')+'</tbody></table></div><p class="muted" style="margin-top:8px;font-size:13px">Sales include storage overflow and grants. Costs include seed, fuel, upkeep and repairs. Land, machinery and upgrades are not counted.</p></div>'+
+    '<div class="card"><h3>Notice board</h3><ul class="news" style="margin-top:6px">'+news+'</ul></div></div>'+
+    '<div class="row" style="margin-top:18px"><button class="btn danger'+(asking?' ask':'')+'" data-a="newGame">'+(asking?'Confirm: erase this game':'Start a new game')+'</button></div>';
+}
+function renderOver(){
+  return'<div class="card over"><h2 class="h2">The bank has closed your accounts</h2><p>You farmed for '+S.week+' weeks and finished with a net worth of '+money(netWorth())+'. Cash that stays below −$15,000 ends the game. Next time, keep a cash buffer and watch the weekly costs on the Bank tab.</p><button class="btn primary" data-a="restart">Start a new game</button></div>';
+}
+function keyOf(e){return e&&e.dataset&&e.dataset.a?[e.dataset.a,e.dataset.id,e.dataset.i,e.dataset.k,e.dataset.amt,e.dataset.pct,e.dataset.farm,e.dataset.job].join('|'):null;}
+function photoShowcase(tab){
+  const items=[
+    {eyebrow:'FIELD NOTES · 01',title:'Build your farmland',sub:'LAND MARKET',img:'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=85',dest:'land',alt:'Rolling green farmland under a wide open sky'},
+    {eyebrow:'GROW · HARVEST · SELL',title:'From seed to sale',sub:'CROP MARKET',img:'https://images.unsplash.com/photo-1499529112087-3cb3b73cec95?auto=format&fit=crop&w=900&q=85',dest:'crops',alt:'Sunlit rows of growing crops in a farm field'},
+    {eyebrow:'UPGRADE YOUR OPERATION',title:'Power up the farm',sub:'MACHINERY',img:'https://images.unsplash.com/photo-1592982537447-6f2a6a0e4a7c?auto=format&fit=crop&w=900&q=85',dest:'machines',alt:'Agricultural machinery working in a field'}
+  ];
+  return '<div class="visual-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6"/></svg><span>YOUR FARM, YOUR STRATEGY · Choose a shortcut to explore</span></div><section class="photo-showcase" aria-label="Farm shortcuts">'+items.map((it,i)=>'<article class="photo-tile"><img src="'+it.img+'" alt="'+it.alt+'" loading="'+(i?'lazy':'eager')+'" onerror="this.style.opacity=0"><div class="photo-copy"><small>'+it.eyebrow+'</small><b>'+it.title+'</b><button type="button" data-a="tab" data-id="'+it.dest+'">Explore '+it.sub.toLowerCase()+' ↗</button></div></article>').join('')+'</section>';
+}
+
+function cashPop(){
+  const c=Math.round(S.cash),l=UI.lastCash;UI.lastCash=c;
+  if(l===null||c===l||S.free)return;
+  const d=c-l,e=document.createElement('div');
+  e.className='cpop '+(d>0?'up':'down');e.textContent=(d>0?'+':'−')+money(Math.abs(d));
+  document.body.appendChild(e);setTimeout(()=>e.remove(),1800);
+}
+/* ---------- Sprout the guide ---------- */
+const SPROUT='<svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><ellipse cx="32" cy="60" rx="16" ry="3" fill="rgba(0,0,0,.18)"/><path d="M32 12C30 5 24 3 18 5c1 7 7 10 14 7z" fill="#4E9A3F"/><path d="M32 12c2-7 8-9 14-7-1 7-7 10-14 7z" fill="#6DBB52"/><rect x="31" y="10" width="2.5" height="9" fill="#3C7A31"/><circle cx="32" cy="38" r="21" fill="#8FD16B" stroke="#3C7A31" stroke-width="2.5"/><ellipse cx="24" cy="36" rx="3.4" ry="4.4" fill="#16231A"/><ellipse cx="40" cy="36" rx="3.4" ry="4.4" fill="#16231A"/><circle cx="25.2" cy="34.4" r="1.2" fill="#fff"/><circle cx="41.2" cy="34.4" r="1.2" fill="#fff"/><path d="M26 44q6 6 12 0" stroke="#16231A" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="19" cy="43" r="3" fill="#F4A58A" opacity=".7"/><circle cx="45" cy="43" r="3" fill="#F4A58A" opacity=".7"/></svg>';
+function guideStep(){
+  if(UI.auto)return{k:'auto',msg:'Time is running by itself because Auto is on. Tap Pause to slow down and take your time.',sel:'#dock [data-a=auto]'};
+  if(!S.farms.length){
+    if(S.ui.tab!=='land')return{k:'g1',msg:'Hi, I am Sprout! Let us start a farm. Tap Land market.',sel:'[data-a=tab][data-id=land]'};
+    return{k:'g2',msg:'Pick a farm and tap Buy farm. A small, cheap one is fine to learn on.',sel:'[data-a=buyFarm]:not([disabled])'};
+  }
+  const f=S.farms.find(x=>x.id===S.ui.farm)||S.farms[0];
+  if(S.ui.tab!=='farms'){
+    if(S.ui.tab==='crops'&&stored()>0)return{k:'sell',msg:'Your harvest is in storage. Tap a Sell button to turn crops into cash.',sel:'[data-a=sellCrop]:not([disabled])'};
+    return{k:'back',msg:'Tap Farms to go back to your land and keep working.',sel:'[data-a=tab][data-id=farms]'};
+  }
+  const st=farmStats(f);
+  const qj=st.ready?'harvest':st.wild?'plough':st.plowed?'sow':null;
+  if(qj){
+    const J=JOBS[qj],n=jobIdx(f,qj).length,m=farmHas(f,J.veh);
+    if(!m&&f.hand<=0&&n>0)return{k:'hand',msg:'You are out of hand work for this week. Tap Next week to get it back. Then we will '+J.name.toLowerCase()+'.',sel:'#dock [data-a=next]'};
+    if(qj==='plough')return{k:'plough',msg:'Plough turns wild ground into soil so seeds can grow. Tap the glowing Plough button. By hand you can do '+plural(f.hand,'plot')+' this week.',sel:'.jobs [data-job=plough]:not([disabled])'};
+    if(qj==='sow'){
+      if(S.cash<seedCost(S.ui.crop,f))return{k:'cheap',msg:'Not enough cash for that seed. Pick a cheaper crop from the list.',sel:'.chip'};
+      return{k:'sow',msg:'Soil is ready! Choose a crop in the list, then tap the glowing Sow button to plant it.',sel:'.jobs [data-job=sow]:not([disabled])'};
+    }
+    return{k:'harvest',msg:'Your crops are ripe! Tap Harvest to collect them.',sel:'.jobs [data-job=harvest]:not([disabled])'};
+  }
+  if(stored()>0&&!st.growing)return{k:'sell2',msg:'You have crops in storage. Open the Crops tab to sell them for cash.',sel:'[data-a=tab][data-id=crops]'};
+  return{k:'wait',msg:'Plants need time to grow. Tap Next week. Each plot shows how many weeks are left.'+wxTip(),sel:'#dock [data-a=next]'};
+}
+function renderGuide(){
+  let g=document.getElementById('guide');
+  if(!g){g=document.createElement('div');g.id='guide';document.body.appendChild(g);}
+  document.querySelectorAll('.gl').forEach(e=>e.classList.remove('gl'));
+  if(S.over){g.innerHTML='';document.body.classList.remove('hasguide');return;}
+  const st=guideStep();
+  document.body.classList.toggle('hasguide',!UI.guideOff);
+  g.className=UI.guideOff?'off':'';
+  const GI={g1:0,g2:0,plough:1,sow:2,cheap:2,wait:3,auto:3,harvest:4,sell:5,sell2:5};
+  if(GI[st.k]!==undefined)UI.gi=GI[st.k];
+  const PATH=[['🏞️','Buy'],['🚜','Plough'],['🌱','Sow'],['⏳','Grow'],['🌾','Harvest'],['💰','Sell']];
+  const path='<div class="gpath" aria-hidden="true">'+PATH.map((x,i)=>'<span class="'+(i===UI.gi?'now':i<UI.gi?'done':'')+'"><i>'+(i<UI.gi?'✓':x[0])+'</i><em>'+x[1]+'</em></span>').join('')+'</div>';
+  g.innerHTML='<button type="button" class="gm" data-a="guide" aria-label="'+(UI.guideOff?'Show Sprout the guide':'Hide Sprout the guide')+'">'+SPROUT+'</button>'+
+    (UI.guideOff?'':'<div class="gb" role="status"><b>Sprout</b>'+path+'<p>'+st.msg+'</p><button type="button" class="gx" data-a="guide">Hide tips</button></div>');
+  if(UI.guideOff)return;
+  const el=document.querySelector(st.sel);
+  if(el){
+    el.classList.add('gl');
+    if(UI.guideKey!==st.k){UI.guideKey=st.k;if(st.k!=='wait'&&st.k!=='hand'&&st.k!=='auto'){setTimeout(()=>{const t=document.querySelector('.gl');if(t){const r=t.getBoundingClientRect();if(r.top>innerHeight*.55||r.top<80)window.scrollBy(0,r.top-innerHeight*.3);}},60);}}
+  }else UI.guideKey=st.k;
+}
+
+function render(){
+  ensureW();S.orders=S.orders||{};
+  if(S.free&&S.cash<5e8)S.cash=1e9;
+  const fk=keyOf(document.activeElement);
+  renderBand();renderTabs();
+  const R={contracts:renderContracts,farms:renderFarms,land:renderLand,crops:renderCrops,machines:renderMachines,bank:renderBank};
+  $('#view').innerHTML=S.over?renderOver():(R[S.ui.tab]||renderFarms)();
+  renderDock();renderGuide();cashPop();
+  if(fk){
+    let found=null;
+    document.querySelectorAll('[data-a]').forEach(e=>{if(!found&&!e.disabled&&keyOf(e)===fk)found=e;});
+    if(found&&found.focus)found.focus({preventScroll:true});
+  }
+}
+
+/* ---------- actions ---------- */
+const CONFIRM=new Set(['sellFarm','sellVeh','clearPlot','newGame']);
+function afterJob(f,job,r){
+  if(!r.n){toast(r.err||'Nothing to do.','warn');return;}
+  const J=JOBS[job],V=VEH[J.veh];
+  let m;
+  if(job==='harvest')m='Harvested '+plural(r.n,'plot')+': '+Object.keys(r.got).map(k=>r.got[k]+' '+CROPS[k].name.toLowerCase()).join(', ');
+  else if(job==='plough')m='Ploughed '+plural(r.n,'plot');
+  else if(job==='sow')m='Sowed '+plural(r.n,'plot')+' of '+CROPS[S.ui.crop].name.toLowerCase()+' for '+money(r.spent);
+  else m='Sprayed '+plural(r.n,'growing plot')+'. Safe from pests for 6 weeks';
+  if(r.mach){m=V.name+': '+m+' (fuel '+money(r.fuel)+')';setAnim(J.veh,job,f.id);}
+  else m+=' by hand. '+f.hand+' hand work left';
+  if(r.over)m+='. Storage full: '+r.over+' units sold at 70%';
+  if(r.err)m+='. '+r.err;
+  toast(m+'.');
+}
+function plotClick(f,i){
+  if(!f)return;
+  const pl=f.plots[i];
+  if(pl.s===2&&pl.p<pl.need){S.ui.plot={f:f.id,i:i};return;}
+  if(f.hand<=0){toast('No hand work left on this farm this week. Deploy a machine or press Next week.','warn');return;}
+  if(pl.s===0){f.plots[i]={s:1};f.hand--;S.ui.plot=null;return;}
+  if(pl.s===1){const err=plantPlot(f,i,S.ui.crop);if(err)toast(err,'warn');else{f.hand--;S.ui.plot=null;}return;}
+  const r=harvestPlot(f,i);
+  if(r){f.hand--;toast('Harvested '+r.n+' '+CROPS[r.crop].name.toLowerCase()+(r.over?'. Storage was full, so '+r.over+' sold at 70%.':'.'));}
+}
+function act(a,d){
+  const key=ck(a,d.id||'',d.i||'');
+  if(CONFIRM.has(a)){
+    if(UI.confirm!==key){
+      UI.confirm=key;clearTimeout(confirmTimer);
+      confirmTimer=setTimeout(()=>{UI.confirm=null;render();},4500);
+      render();return;
+    }
+    UI.confirm=null;
+  }else UI.confirm=null;
+  const f=d.id?S.farms.find(x=>x.id===+d.id):null;
+  switch(a){
+    case'tab':S.ui.tab=d.id;break;
+    case'autop':{const ff=S.farms.find(x=>x.id==d.id);if(ff){ff.auto=!ff.auto;toast(ff.auto?ff.name+' now runs on autopilot each week.':'Autopilot off.');}break;}
+    case'cAccept':{ensureC();const o=S.cOffers.find(x=>x.id==d.id);if(!o)break;if(S.contracts.length>=3){toast('You already hold 3 contracts.','warn');break;}
+      S.contracts.push({id:o.id,crop:o.crop,qty:o.qty,reward:o.reward,due:S.week+o.len});S.cOffers=S.cOffers.filter(x=>x.id!==o.id);
+      toast('Contract accepted: '+o.qty+' '+CROPS[o.crop].name.toLowerCase()+' by week '+(S.week+o.len)+'.');break;}
+    case'cDeliver':{ensureC();const c=S.contracts.find(x=>x.id==d.id);if(!c)break;
+      if(S.stock[c.crop]<c.qty){toast('Not enough '+CROPS[c.crop].name.toLowerCase()+' in storage yet.','warn');break;}
+      S.stock[c.crop]-=c.qty;S.cash+=c.reward;S.cur.income+=c.reward;gain(c.reward/15);S.cDone++;S.contracts=S.contracts.filter(x=>x.id!==c.id);
+      toast('Contract delivered. You earned '+money(c.reward)+'.');break;}
+    case'free':{S.free=!S.free;if(S.free){S.cash=1e9;toast('Unlimited money is on.');}else{S.cash=20000;toast('Unlimited money is off. Cash set to $20,000.');}break;}
+    case'ordSet':{S.orders=S.orders||{};const k=d.id;S.orders[k]={t:Math.round(price(k)*1.15*100)/100};toast('Auto-sell set. All '+CROPS[k].name.toLowerCase()+' sells when the price reaches '+money2(S.orders[k].t)+'.');break;}
+    case'ordT':{const o=S.orders&&S.orders[d.id];if(o)o.t=Math.max(CROPS[d.id].price*.5,Math.round((o.t+(+d.d)*CROPS[d.id].price*.05)*100)/100);break;}
+    case'ordOff':{if(S.orders)delete S.orders[d.id];toast('Auto-sell cancelled.');break;}
+    case'band':UI.bandOpen=!UI.bandOpen;break;
+    case'guide':UI.guideOff=!UI.guideOff;UI.guideKey='';break;
+    case'next':nextWeek();notifyWeek();break;
+    case'auto':setAuto(!UI.auto);break;
+    case'speed':S.ui.speed=S.ui.speed===1?2:S.ui.speed===2?4:1;if(UI.auto)setAuto(true);break;
+    case'crop':if(lvl()>=CROP_LV[d.id])S.ui.crop=d.id;else toast('Unlocks at level '+CROP_LV[d.id]+'.','warn');break;
+    case'farm':S.ui.farm=+d.id;S.ui.plot=null;break;
+    case'plot':plotClick(f,+d.i);break;
+    case'job':if(f&&JOBS[d.job])afterJob(f,d.job,runJob(f,d.job));break;
+    case'clearPlot':if(f){f.plots[+d.i]={s:1};S.ui.plot=null;toast('Crop ploughed under. The plot is ready to sow again.');}break;
+    case'hire':{
+      if(!f)break;
+      const t=WK[+d.k];if(!t)break;
+      if(lvl()<t.lv){toast(t.role+' unlocks at level '+t.lv+'.','warn');break;}
+      if(wk(f).length>=maxCrew()){toast('Your crew is full for your level.','warn');break;}
+      if(S.cash<t.fee){toast('Not enough cash.','warn');break;}
+      S.cash-=t.fee;
+      const w={id:S.nextId++,name:pick(WNAMES),t:+d.k,skin:pick(SKINS),shirt:pick(SHIRTS),hat:pick(HATS)};
+      wk(f).push(w);f.hand+=t.hand;gain(10);
+      toast(w.name+' joined '+f.name+' as a '+t.role.toLowerCase()+'.');break;}
+    case'buyAn':{
+      if(!f)break;
+      const A=ANIM[d.k];if(!A)break;
+      const a=an(f);
+      if(lvl()<A.lv){toast(apl(A)+' unlock at level '+A.lv+'.','warn');break;}
+      if((a[d.k]||0)>=10){toast('The pen is full.','warn');break;}
+      if(S.cash<A.price){toast('Not enough cash.','warn');break;}
+      S.cash-=A.price;a[d.k]=(a[d.k]||0)+1;gain(5);
+      toast('Bought a '+A.name.toLowerCase()+' for '+money(A.price)+'.');break;}
+    case'sellAn':{
+      if(!f)break;
+      const A=ANIM[d.k],a=an(f);
+      if(A&&a[d.k]>0){a[d.k]--;const v=Math.round(A.price*.7);S.cash+=v;toast('Sold a '+A.name.toLowerCase()+' for '+money(v)+'.');}
+      break;}
+    case'fire':{
+      if(!f)break;
+      const k=wk(f).findIndex(x=>x.id===+d.i);
+      if(k>-1){const w=f.workers.splice(k,1)[0];f.hand=Math.min(f.hand,handMax(f));toast(w.name+' has left the crew.');}
+      break;}
+    case'mgr':
+      if(f){f.manager=!f.manager;toast(f.manager?'Manager hired at '+money(mgrWage(f))+' a week.':'Manager dismissed.');}
+      break;
+    case'upg':
+      if(!f)break;
+      if(d.k==='expand'){
+        const cost=Math.round(4*1200*f.soil);
+        if(f.plots.length>=40)toast('This farm is at its maximum size.','warn');
+        else if(S.cash<cost)toast('Not enough cash.','warn');
+        else{S.cash-=cost;for(let n=0;n<4;n++)f.plots.push({s:0});toast('Added 4 plots to '+f.name+'.');}
+      }else if(UPG[d.k]&&!f[d.k]){
+        const u=UPG[d.k];
+        if(S.cash<u.cost)toast('Not enough cash.','warn');
+        else{S.cash-=u.cost;f[d.k]=true;toast(u.name+' installed at '+f.name+'.');}
+      }
+      break;
+    case'sellFarm':
+      if(!f)break;
+      {const v=farmSell(f);S.cash+=v;S.farms=S.farms.filter(x=>x.id!==f.id);S.vehicles.forEach(m=>{if(m.farm===f.id)m.farm=null;});S.ui.farm=S.farms.length?S.farms[0].id:null;S.ui.plot=null;log('Sold '+f.name+' for '+money(v)+'.');toast('Sold '+f.name+' for '+money(v)+'.');}
+      break;
+    case'buyFarm':{
+      const l=S.listings.find(x=>x.id===+d.id);
+      if(!l)break;
+      if(S.cash<l.price){toast('Not enough cash.','warn');break;}
+      S.cash-=l.price;
+      const nf=makeFarm(l.name,l.plots,l.soil,l);
+      S.farms.push(nf);S.listings=S.listings.filter(x=>x.id!==l.id);
+      S.ui.farm=nf.id;S.ui.tab='farms';S.ui.plot=null;
+      gain(25);log('Bought '+l.name+' for '+money(l.price)+'.','good');toast('You bought '+l.name+'. The land is wild, so start by ploughing.');
+      break;}
+    case'sellCrop':{
+      const k=d.id,qty=Math.floor(S.stock[k]*(+d.pct)/100);
+      const rev=sell(k,+d.pct===100?S.stock[k]:Math.max(1,qty));
+      if(rev){toast('Sold '+CROPS[k].name.toLowerCase()+' for '+money(rev)+'.');if(deployed('truck'))setAnim('truck',null,null,'crops');}
+      break;}
+    case'sellAll':{
+      let tot=0;CROP_KEYS.forEach(k=>{tot+=sell(k,S.stock[k]);});
+      if(tot){toast('Sold all stored crops for '+money(tot)+'.');if(deployed('truck'))setAnim('truck',null,null,'crops');}
+      break;}
+    case'buyVeh':{
+      const V=VEH[d.id];
+      if(!V)break;
+      if(lvl()<VEH_LV[d.id]){toast(V.name+' unlocks at level '+VEH_LV[d.id]+'.','warn');break;}
+      if(S.cash<V.price){toast('Not enough cash.','warn');break;}
+      S.cash-=V.price;S.vehicles.push({id:S.nextId++,type:d.id,age:0,farm:null});
+      log('Bought a '+V.name.toLowerCase()+'. Deploy it to a farm to use it.','good');toast(V.name+' bought. Deploy it to a farm to use it.');
+      break;}
+    case'buyUsed':{
+      const u=S.used.find(x=>x.id===+d.id);
+      if(!u)break;
+      if(S.cash<u.price){toast('Not enough cash.','warn');break;}
+      S.cash-=u.price;S.vehicles.push({id:S.nextId++,type:u.type,age:u.age,farm:null});
+      S.used=S.used.filter(x=>x.id!==u.id);
+      log('Bought a used '+VEH[u.type].name.toLowerCase()+'. Deploy it to a farm to use it.','good');toast('Used '+VEH[u.type].name.toLowerCase()+' bought. Deploy it to a farm to use it.');
+      break;}
+    case'deploy':{
+      const v=S.vehicles.find(x=>x.id===+d.id);
+      if(!v)break;
+      if(!d.farm){v.farm=null;toast(VEH[v.type].name+' returned to the garage.');break;}
+      const tf=S.farms.find(x=>x.id===+d.farm);
+      if(!tf)break;
+      if(farmHas(tf,v.type)){toast(tf.name+' already has a '+VEH[v.type].name.toLowerCase()+'.','warn');break;}
+      v.farm=tf.id;toast(VEH[v.type].name+' is now working at '+tf.name+'.');
+      break;}
+    case'sellVeh':{
+      const v=S.vehicles.find(x=>x.id===+d.id);
+      if(!v)break;
+      const val=vehSell(v);S.cash+=val;S.vehicles=S.vehicles.filter(x=>x.id!==v.id);
+      log('Sold the '+VEH[v.type].name.toLowerCase()+' for '+money(val)+'.');toast('Sold for '+money(val)+'.');
+      break;}
+    case'borrow':{
+      const amt=+d.amt,room=creditLimit()-S.loan;
+      if(amt>room){toast('That is over your credit limit.','warn');break;}
+      S.loan+=amt;S.cash+=amt;toast('Borrowed '+money(amt)+'.');
+      break;}
+    case'repay':{
+      let amt=d.amt==='all'?S.loan:Math.min(+d.amt,S.loan);
+      amt=Math.min(amt,Math.max(0,Math.floor(S.cash)));
+      if(amt<=0){toast('You have no cash to repay with.','warn');break;}
+      S.loan-=amt;S.cash-=amt;toast('Repaid '+money(amt)+'.');
+      break;}
+    case'newGame':case'restart':setAuto(false);newGame();break;
+  }
+  render();save();
+}
+function onClick(e){
+  const b=e.target&&e.target.closest?e.target.closest('[data-a]'):null;
+  if(!b||b.disabled)return;
+  act(b.dataset.a,b.dataset);
+}
+
+/* ---------- boot ---------- */
+if(!load())newGame();
+document.addEventListener('click',onClick);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&UI.auto){setAuto(false);render();}});
+render();
+</script>
+
+</body></html>
