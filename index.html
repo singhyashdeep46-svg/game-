@@ -4064,8 +4064,8 @@ html.dark-mode .hf-chip:not(.on){color:#f5f5f7}
 .salpg .sal-stat b{font-size:17px}
 @media (min-width:880px){
   .salpg .sal-summary{grid-template-columns:repeat(4,1fr)}
-  #orderSalaryContainer{max-width:760px}
-  #orderSalaryContainer .sal-card{max-width:none}
+  #orderSalaryContainer>*{width:100%;max-width:760px;box-sizing:border-box;margin-left:auto!important;margin-right:auto!important}
+  .salpg-back{display:block;text-align:left}
 }
 html.dark-mode .salpg-how{color:#f5f5f7}
 html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
