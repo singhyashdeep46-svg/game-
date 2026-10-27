@@ -4069,6 +4069,33 @@ html.dark-mode .hf-chip:not(.on){color:#f5f5f7}
 }
 html.dark-mode .salpg-how{color:#f5f5f7}
 html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
+
+/* ---- salary v4: alignment fixes, painter calendar ---- */
+.salpg .sal-monthbar .calendar-nav-btn{width:40px;height:40px;font-size:20px;flex-shrink:0}
+.salpg .sal-month{font-size:17px!important}
+.salpg-how{display:block!important;padding:0!important;margin:4px 0 14px!important;background:var(--ap-tint)}
+.salpg-how summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:600;font-size:13px;color:var(--ap-green)}
+.salpg-how summary::-webkit-details-marker{display:none}
+.salpg-how div{display:flex;flex-direction:column;gap:3px;padding:0 14px 12px}
+.sal-seg.two{grid-template-columns:repeat(2,1fr)}
+.sal-seg.four{grid-template-columns:repeat(4,1fr)}
+.sal-seg-btn.on.x{background:var(--ap-ink);color:var(--ap-bg)}
+.sal-seg-btn{min-height:40px;font-size:13px}
+.sal-type-btn{min-height:44px;border:0!important;border-radius:11px!important;background:transparent!important;color:var(--ap-ink)!important;font:600 14px/1 var(--ap-font)}
+.sal-type-btn.active{background:var(--ap-green)!important;color:#fff!important}
+.sal-type-group{display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important;padding:4px;border-radius:14px;background:var(--ap-field)}
+.sal-btn.full{width:100%;margin-top:6px}
+.sal-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.sal-form select{width:100%}
+.sal-adv-item .k{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:6px;background:var(--ap-field)}
+.sal-adv-item .k.bonus{color:var(--ap-green)}.sal-adv-item .k.deduction{color:#e11d3f}
+.sal-att{display:block!important;margin-top:10px}
+.sal-day{min-height:42px;aspect-ratio:auto!important;font-size:14px!important}
+.sal-day.today{outline:2px solid var(--ap-green);outline-offset:1px}
+.sal-day.ad{font-size:9px;font-weight:600;opacity:.65}
+.sal-row.pos b{color:var(--ap-green)}
+@media (max-width:420px){.sal-seg-btn{font-size:12px}}
+html.dark-mode .sal-seg-btn.on.x{background:#f5f5f7!important;color:#15191d!important}
 </style>
 
 </head>
@@ -4365,12 +4392,14 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     <div class="section-title-container" style="margin-top:4px;">
       <h2>Staff Salary &amp; Advance</h2>
     </div>
-    <div class="salpg-how">
-      <b>How it works</b>
-      <span>1. Mark attendance each day.</span>
-      <span>2. Add an advance whenever money is given.</span>
-      <span>3. At month end: Balance = Earned &minus; Advances. Tap Mark Paid.</span>
-    </div>
+    <details class="salpg-how">
+      <summary>How it works</summary>
+      <div>
+        <span>1. Pick a mode (Present / Half / Absent), then tap days on the calendar. Use the arrows to open any previous month.</span>
+        <span>2. Add an advance, bonus or deduction whenever it happens.</span>
+        <span>3. Month end: Balance = Earned + Bonus &minus; Deduction &minus; Advance. Tap Mark Paid.</span>
+      </div>
+    </details>
     <div class="salpg">
       <div class="sal-monthbar">
         <button type="button" class="calendar-nav-btn" onclick="salStepMonth(-1)" aria-label="Previous month">&lsaquo;</button>
@@ -4401,10 +4430,15 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
           <label for="salNewSalary" id="salNewSalaryLabel">Monthly Salary (NPR)</label>
           <input type="number" id="salNewSalary" min="0" inputmode="numeric" placeholder="0">
         </div>
-        <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salAddStaff()">Add Staff</button>
+        <button type="button" class="sal-btn primary full" onclick="salAddStaff()">Add Staff</button>
       </div>
-      <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salExportCsv()">Export Salary Sheet (CSV)</button>
-      <div class="sal-note">Salary records are saved on this device only. Use Export to keep a backup.</div>
+      <div class="sal-tools">
+        <button type="button" class="sal-btn" onclick="salExportCsv()">Export CSV</button>
+        <button type="button" class="sal-btn" onclick="salBackup()">Backup (JSON)</button>
+        <button type="button" class="sal-btn" style="grid-column:1/-1" onclick="document.getElementById('salRestoreFile').click()">Restore from backup</button>
+        <input type="file" id="salRestoreFile" accept="application/json,.json" style="display:none" onchange="salRestore(this)">
+      </div>
+      <div class="sal-note">Salary records are saved on this device only. Take a Backup now and then, and restore it on a new phone or browser.</div>
     </div>
   </div>
 
@@ -4935,7 +4969,8 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
   let salData = { staff: [], advances: [], paid: {}, att: {} };
   let salViewYear = null, salViewMonth = null;   // BS month being viewed
   let salOpenForm = null;                         // staff id with advance form open
-  let salOpenAtt = null;                          // staff id with attendance grid open
+  let salAttClosed = {};                          // staff ids whose calendar is collapsed
+  let salMode = 'p';                              // painter: p / h / a / x(clear)
   let salNewType = 'monthly';
 
   function salLoad() {
@@ -4955,7 +4990,16 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
   function salEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function salKey(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
   function salIsDaily(st) { return st.type === 'daily'; }
-  function salRate(st) { return Number(salIsDaily(st) ? st.rate : st.salary) || 0; }
+  function salRate(st, y, m) {
+    // wage history: a change applies from the month it was made, earlier months keep their old rate
+    if (y === undefined) { y = salViewYear; m = salViewMonth; }
+    const base = Number(salIsDaily(st) ? st.rate : st.salary) || 0;
+    if (!st.rates || !st.rates.length || y === null) return base;
+    const k = salKey(y, m);
+    let best = null;
+    st.rates.forEach(function (r) { if (r.k <= k && (!best || r.k >= best.k)) best = r; });
+    return best ? best.v : (st.rates.slice().sort(function (a, b) { return a.k < b.k ? -1 : 1; })[0].old);
+  }
 
   function salInMonth(iso, y, m) {
     const dt = dateOfIso(iso);
@@ -4965,13 +5009,14 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
 
   // Everything a card / the dashboard needs for one staff member in one BS month
   function salCompute(st, y, m) {
-    const advs = salData.advances.filter(function (a) { return a.staffId === st.id && salInMonth(a.iso, y, m); })
+    const all = salData.advances.filter(function (a) { return a.staffId === st.id && salInMonth(a.iso, y, m); })
       .sort(function (a, b) { return a.iso < b.iso ? -1 : 1; });
-    const advTotal = advs.reduce(function (t, a) { return t + a.amount; }, 0);
+    const kindSum = function (k) { return all.filter(function (a) { return (a.kind || 'advance') === k; }).reduce(function (t, a) { return t + a.amount; }, 0); };
+    const advs = all, advTotal = kindSum('advance'), bonus = kindSum('bonus'), ded = kindSum('deduction');
     const attMap = salData.att[st.id + '|' + salKey(y, m)] || {};
     const days = Object.keys(attMap).reduce(function (t, d) { return t + attMap[d]; }, 0);
-    const earned = salIsDaily(st) ? salRate(st) * days : salRate(st);
-    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, earned: earned, net: earned - advTotal,
+    const earned = salIsDaily(st) ? salRate(st, y, m) * days : salRate(st, y, m);
+    return { advs: advs, advTotal: advTotal, bonus: bonus, ded: ded, attMap: attMap, days: days, earned: earned, net: earned + bonus - ded - advTotal,
              paid: salData.paid[st.id + '|' + salKey(y, m)] || null };
   }
 
@@ -4980,7 +5025,7 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
   window.openSalarySheet = function () {
     salLoad();
     if (salViewYear === null) { const bs = salCurrentBs(); salViewYear = bs.y; salViewMonth = bs.m; }
-    salOpenForm = null; salOpenAtt = null;
+    salOpenForm = null;
     salRender();
     switchTab('salary');
     window.scrollTo(0, 0);
@@ -4995,7 +5040,7 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     if (m > 11) { m = 0; y++; }
     if (m < 0) { m = 11; y--; }
     if (y < BS_MIN_YEAR || y > BS_MAX_YEAR) return;
-    salViewMonth = m; salViewYear = y; salOpenForm = null; salOpenAtt = null;
+    salViewMonth = m; salViewYear = y; salOpenForm = null;
     salRender();
   };
 
@@ -5025,10 +5070,13 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
   window.salEditSalary = function (id) {
     const st = salData.staff.find(function (x) { return x.id === id; });
     if (!st) return;
-    const v = window.prompt((salIsDaily(st) ? 'Daily wage' : 'Monthly salary') + ' for ' + st.name + ' (NPR):', salRate(st));
+    const v = window.prompt((salIsDaily(st) ? 'Daily wage' : 'Monthly salary') + ' for ' + st.name + ' from ' + BS_MONTHS[salViewMonth] + ' ' + salViewYear + ' onward (NPR).\nEarlier months keep their old amount:', salRate(st));
     if (v === null) return;
     const n = Number(v);
     if (v.trim() === '' || isNaN(n) || n < 0) { appAlert('Enter a valid amount.'); return; }
+    const k = salKey(salViewYear, salViewMonth), prevOld = (st.rates && st.rates.length) ? st.rates[0].old : salRate(st);
+    st.rates = (st.rates || []).filter(function (r) { return r.k !== k; });
+    st.rates.push({ k: k, v: n, old: prevOld });
     if (salIsDaily(st)) st.rate = n; else st.salary = n;
     salSave(); salRender();
   };
@@ -5054,17 +5102,16 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
   };
 
   window.salToggleAtt = function (id) {
-    salOpenAtt = salOpenAtt === id ? null : id;
+    if (salAttClosed[id]) delete salAttClosed[id]; else salAttClosed[id] = 1;
     salRender();
   };
+  window.salSetMode = function (m) { salMode = m; salRender(); };
 
-  // none -> full day -> half day -> none
+  // Tap a day: applies the selected mode (Present / Half / Absent / Clear)
   window.salTapDay = function (id, day) {
     const key = id + '|' + salKey(salViewYear, salViewMonth);
     const map = salData.att[key] || (salData.att[key] = {});
-    const cur = map[day] || 0;
-    const has = Object.prototype.hasOwnProperty.call(map, day);
-    if (!has) map[day] = 1; else if (cur === 1) map[day] = 0.5; else if (cur === 0.5) map[day] = 0; else delete map[day];
+    if (salMode === 'x') delete map[day]; else map[day] = salMode === 'p' ? 1 : salMode === 'h' ? 0.5 : 0;
     if (!Object.keys(map).length) delete salData.att[key];
     salSave(); salRender();
   };
@@ -5095,8 +5142,10 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     if (c.advs.length) {
       L.push('');
       L.push('Advances:');
-      c.advs.forEach(function (a) { L.push('- ' + formatDateHuman(a.iso) + ': ' + salNpr(a.amount) + (a.note ? ' (' + a.note + ')' : '')); });
+      c.advs.forEach(function (a) { L.push('- ' + formatDateHuman(a.iso) + ' ' + (a.kind || 'advance') + ': ' + salNpr(a.amount) + (a.note ? ' (' + a.note + ')' : '')); });
     }
+    if (c.bonus) L.push('Bonus: + ' + salNpr(c.bonus));
+    if (c.ded) L.push('Deduction: - ' + salNpr(c.ded));
     L.push('Total advance: ' + salNpr(c.advTotal));
     L.push('');
     L.push('*' + (c.net < 0 ? 'Over-advanced: ' : 'Balance to pay: ') + salNpr(Math.abs(c.net)) + '*');
@@ -5124,10 +5173,11 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     const amtEl = document.getElementById('salAdvAmt-' + id);
     const dateEl = document.getElementById('salAdvDate-' + id);
     const noteEl = document.getElementById('salAdvNote-' + id);
+    const kind = document.getElementById('salAdvKind-' + id).value;
     const amount = Number(amtEl.value);
     const iso = dateEl.dataset.iso || isoOfDate(new Date());
-    if (!(amount > 0)) { appAlert('Enter the advance amount.'); return; }
-    salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, note: noteEl.value.trim() });
+    if (!(amount > 0)) { appAlert('Enter the amount.'); return; }
+    salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, kind: kind, note: noteEl.value.trim() });
     const bs = adToBs(dateOfIso(iso));
     if (bs) { salViewYear = bs.y; salViewMonth = bs.m; }
     salOpenForm = null;
@@ -5169,10 +5219,11 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     for (let i = 0; i < firstWd; i++) h += '<button type="button" class="sal-day empty" disabled></button>';
     for (let d = 1; d <= dim; d++) {
       const v = c.attMap[d] || 0;
-      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '');
+      const cur0 = salCurrentBs(), isToday = cur0.y === salViewYear && cur0.m === salViewMonth && cur0.d === d;
+      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '') + (isToday ? ' today' : '');
       h += '<button type="button" class="' + cls + '" onclick="salTapDay(\'' + st.id + '\',' + d + ')">' + d + '</button>';
     }
-    h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span><i style="background:rgba(225,29,63,.35)"></i>Absent</span><span>Tap a day to change</span></div>' +
+    h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span><i style="background:rgba(225,29,63,.35)"></i>Absent</span><span>Pick a mode above, then tap days</span></div>' +
       '<div class="sal-actions"><button type="button" class="history-card-btn-view" onclick="salAllPresent(\'' + st.id + '\')">All Present (except Sat)</button>' +
       '<button type="button" class="history-card-btn-delete" onclick="salClearAtt(\'' + st.id + '\')">Clear</button></div>';
     return h;
@@ -5187,44 +5238,47 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     salData.staff.forEach(function (st) {
       const c = salCompute(st, salViewYear, salViewMonth);
       const daily = salIsDaily(st);
-      totEarned += c.earned; totAdv += c.advTotal; if (c.paid) paidN++;
+      totEarned += c.earned + c.bonus - c.ded; totAdv += c.advTotal; if (c.paid) paidN++;
       const advHtml = c.advs.length ? c.advs.map(function (a) {
-        return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + '</small></span>' +
+        return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<span class="k ' + (a.kind || 'advance') + '">' + (a.kind === 'bonus' ? 'Bonus' : a.kind === 'deduction' ? 'Deduction' : 'Advance') + '</span><small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + a.id + '\')" aria-label="Delete advance">&times;</button></div>';
-      }).join('') : '<div class="sal-sub">No advance taken this month.</div>';
-      const formOpen = salOpenForm === st.id, attOpen = salOpenAtt === st.id;
+      }).join('') : '<div class="sal-sub">No advance, bonus or deduction this month.</div>';
+      const formOpen = salOpenForm === st.id;
       const cur = salCurrentBs(), isNow = cur.y === salViewYear && cur.m === salViewMonth;
-      const tv = isNow ? c.attMap[cur.d] : undefined;
       let cp = 0, ch = 0, ca = 0;
       Object.keys(c.attMap).forEach(function (d) { const v = c.attMap[d]; if (v === 1) cp++; else if (v === 0.5) ch++; else ca++; });
       const seg = function (label, val, cls) {
-        return '<button type="button" class="sal-seg-btn ' + cls + (tv === val ? ' on' : '') + '" onclick="salSetDay(\'' + st.id + '\',' + cur.d + ',' + val + ')">' + label + '</button>';
+        return '<button type="button" class="sal-seg-btn ' + cls + (salMode === val ? ' on' : '') + '" onclick="salSetMode(\'' + val + '\')">' + label + '</button>';
       };
+      const attOpenNow = !salAttClosed[st.id];
       html += '<div class="sal-card">' +
         '<div class="sal-card-top"><div class="sal-who"><span class="sal-avatar">' + salEsc(st.name.charAt(0).toUpperCase()) + '</span><div><div class="sal-name">' + salEsc(st.name) + '<span class="sal-tag ' + (daily ? 'daily' : '') + '">' + (daily ? 'Daily' : 'Monthly') + '</span></div>' +
         '<div class="sal-sub">' + (daily ? salNpr(salRate(st)) + ' per day' : salNpr(salRate(st)) + ' per month') + '</div></div></div>' +
         '<span class="sal-pill ' + (c.paid ? 'paid' : 'due') + '">' + (c.paid ? 'Paid ' + salEsc(formatDateHuman(c.paid.iso)) : 'Not paid') + '</span></div>' +
-        '<div class="sal-block"><div class="sal-block-head"><span>Attendance' + (isNow ? ' &middot; Today' : '') + '</span>' +
-          '<button type="button" class="sal-link" onclick="salToggleAtt(\'' + st.id + '\')">' + (attOpen ? 'Hide calendar' : 'Month calendar') + '</button></div>' +
-          (isNow ? '<div class="sal-seg">' + seg('Present', 1, 'p') + seg('Half day', 0.5, 'h') + seg('Absent', 0, 'a') + '</div>' : '') +
+        '<div class="sal-block"><div class="sal-block-head"><span>Attendance' + ' &middot; ' + BS_MONTHS[salViewMonth] + '</span>' +
+          '<button type="button" class="sal-link" onclick="salToggleAtt(\'' + st.id + '\')">' + (attOpenNow ? 'Hide calendar' : 'Show calendar') + '</button></div>' +
+          (attOpenNow ? '<div class="sal-seg four">' + seg('Present', 'p', 'p') + seg('Half', 'h', 'h') + seg('Absent', 'a', 'a') + seg('Clear', 'x', 'x') + '</div>' : '') +
           '<div class="sal-chips"><span class="chip p"><b>' + cp + '</b> Present</span><span class="chip h"><b>' + ch + '</b> Half</span><span class="chip a"><b>' + ca + '</b> Absent</span></div>' +
-          '<div class="sal-att' + (attOpen ? ' open' : '') + '">' + (attOpen ? salAttendanceHtml(st, c) : '') + '</div>' +
+          '<div class="sal-att open">' + (attOpenNow ? salAttendanceHtml(st, c) : '') + '</div>' +
           (daily ? '' : '<div class="sal-note" style="text-align:left;margin-top:8px">Monthly staff: attendance is for records, salary stays fixed.</div>') +
         '</div>' +
         '<div class="sal-block"><div class="sal-block-head"><span>This month</span></div><div class="sal-rows">' +
           (daily ? '<div class="sal-row"><span>Days worked</span><b>' + c.days + ' &times; ' + salNpr(salRate(st)) + '</b></div>' : '') +
           '<div class="sal-row"><span>' + (daily ? 'Earned' : 'Salary') + '</span><b>' + salNpr(c.earned) + '</b></div>' +
+          (c.bonus ? '<div class="sal-row pos"><span>Bonus</span><b>+ ' + salNpr(c.bonus) + '</b></div>' : '') +
+          (c.ded ? '<div class="sal-row neg"><span>Deduction</span><b>- ' + salNpr(c.ded) + '</b></div>' : '') +
           '<div class="sal-row neg"><span>Advance taken</span><b>- ' + salNpr(c.advTotal) + '</b></div>' +
           '<div class="sal-row net"><span>' + (c.net < 0 ? 'Over-advanced' : 'Balance to pay') + '</span><b' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</b></div>' +
         '</div><div class="sal-adv-list">' + advHtml + '</div></div>' +
         '<div class="sal-form' + (formOpen ? ' open' : '') + '">' +
-          '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Advance Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
+          '<div class="input-group"><label for="salAdvKind-' + st.id + '">Type</label><select id="salAdvKind-' + st.id + '"><option value="advance">Advance (money given)</option><option value="bonus">Bonus (add)</option><option value="deduction">Deduction (subtract)</option></select></div>' +
+          '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
           '<div class="input-group"><label for="salAdvDate-' + st.id + '">Date (BS)</label><input type="text" id="salAdvDate-' + st.id + '" readonly placeholder="Select date" autocomplete="off" style="cursor:pointer;" onclick="openCalendarPopup(\'salAdvDate-' + st.id + '\')"></div>' +
           '<div class="input-group"><label for="salAdvNote-' + st.id + '">Note (optional)</label><input type="text" id="salAdvNote-' + st.id + '" placeholder="Reason"></div>' +
           '<button type="button" class="sal-btn primary" onclick="salAddAdvance(\'' + st.id + '\')">Save Advance</button>' +
         '</div>' +
         '<div class="sal-main-actions">' +
-          '<button type="button" class="sal-btn" onclick="salToggleAdvForm(\'' + st.id + '\')">' + (formOpen ? 'Cancel' : 'Give Advance') + '</button>' +
+          '<button type="button" class="sal-btn" onclick="salToggleAdvForm(\'' + st.id + '\')">' + (formOpen ? 'Cancel' : 'Advance / Bonus') + '</button>' +
           '<button type="button" class="sal-btn primary" onclick="salTogglePaid(\'' + st.id + '\')">' + (c.paid ? 'Undo Paid' : 'Mark Paid') + '</button></div>' +
         '<div class="sal-more"><button type="button" class="sal-link" onclick="salShareSlip(\'' + st.id + '\')">Share slip</button><button type="button" class="sal-link" onclick="salEditSalary(\'' + st.id + '\')">' + (daily ? 'Edit wage' : 'Edit salary') + '</button>' +
           '<button type="button" class="sal-link danger" onclick="salRemoveStaff(\'' + st.id + '\')">Remove staff</button></div>' +
@@ -5250,7 +5304,7 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     let earned = 0, adv = 0, rows = '';
     salData.staff.forEach(function (st) {
       const c = salCompute(st, bs.y, bs.m);
-      earned += c.earned; adv += c.advTotal;
+      earned += c.earned + c.bonus - c.ded; adv += c.advTotal;
       const sub = salIsDaily(st) ? c.days + ' day' + (c.days === 1 ? '' : 's') + ' worked' : 'Monthly';
       rows += '<div class="dashboard-mini-row clickable" onclick="openSalarySheet()"><span><span class="name">' + salEsc(st.name) + '</span><br><span class="sub">' + sub +
         (c.advTotal ? ' &middot; advance ' + salNpr(c.advTotal) : '') + (c.paid ? ' &middot; paid' : '') + '</span></span>' +
@@ -5264,6 +5318,31 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
     }
     html += '<button type="button" class="history-card-btn-view dash-sal-btn" style="width:100%;justify-content:center;" onclick="openSalarySheet()">' + (salData.staff.length ? 'Manage Salary, Attendance &amp; Advance' : 'Add Staff') + '</button></div>';
     host.innerHTML = html;
+  };
+
+  window.salBackup = function () {
+    salLoad();
+    const blob = new Blob([JSON.stringify(salData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), link = document.createElement('a');
+    link.href = url; link.download = 'sardar-salary-backup-' + isoOfDate(new Date()) + '.json';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  };
+  window.salRestore = function (input) {
+    const f = input.files && input.files[0]; input.value = '';
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = function () {
+      let p;
+      try { p = JSON.parse(r.result); } catch (e) { p = null; }
+      if (!p || !Array.isArray(p.staff) || !Array.isArray(p.advances)) { appAlert('That file is not a valid salary backup.'); return; }
+      appConfirm('Replace the salary records on this device with the backup (' + p.staff.length + ' staff)?').then(function (ok) {
+        if (!ok) return;
+        salData = { staff: p.staff, advances: p.advances, paid: p.paid || {}, att: p.att || {} };
+        salSave(); salRender();
+      });
+    };
+    r.readAsText(f);
   };
 
   window.salExportCsv = function () {
@@ -5280,7 +5359,7 @@ html.dark-mode .salpg .sal-stat{background:#1b1e24!important}
       rows.push(['Attendance (' + parts[1] + ' BS)', nameOf(parts[0]), 'Daily', '', '', days, 'days worked']);
     });
     salData.advances.slice().sort(function (a, b) { return a.iso < b.iso ? -1 : 1; }).forEach(function (a) {
-      rows.push(['Advance', nameOf(a.staffId), '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
+      rows.push([a.kind === 'bonus' ? 'Bonus' : a.kind === 'deduction' ? 'Deduction' : 'Advance', nameOf(a.staffId), '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
     });
     Object.keys(salData.paid).forEach(function (k) {
       const p = salData.paid[k], parts = k.split('|');
