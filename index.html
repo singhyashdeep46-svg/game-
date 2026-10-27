@@ -3910,6 +3910,54 @@ html.dark-mode .sal-adv-item small, html.dark-mode .sal-note, html.dark-mode .sa
 html.dark-mode .sal-monthbar .sal-month small{ color:#a2a9b5 !important; }
 html.dark-mode .sal-close{ background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.1) !important; color:#a2a9b5 !important; }
 html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{ border-color:rgba(255,255,255,.1) !important; }
+
+/* ---- Salary v2: daily/monthly type, attendance, dashboard card ---- */
+.sal-type-group{ display:flex; gap:8px; }
+.sal-type-btn{
+  flex:1; padding:10px 8px; border-radius:10px; border:1px solid var(--border-color);
+  background:rgba(255,255,255,.6); color:var(--ink); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.sal-type-btn:hover{ border-color:var(--brand-purple-border); }
+.sal-type-btn.active{ background:var(--brand-purple-deep); border-color:var(--brand-purple-deep); color:#fff; }
+html.dark-mode .sal-type-btn{ background:rgba(255,255,255,.05) !important; border-color:rgba(255,255,255,.1) !important; color:#eef0f3 !important; }
+html.dark-mode .sal-type-btn.active{ background:#2fc17f !important; border-color:#2fc17f !important; color:#0e1114 !important; }
+.sal-tag{ display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:700; vertical-align:middle; background:rgba(75,125,184,.12); color:var(--status-info); }
+.sal-tag.daily{ background:rgba(217,154,22,.14); color:var(--status-pending); }
+.sal-att{ display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-color); }
+.sal-att.open{ display:block; }
+.sal-att-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+.sal-att-grid span.h{ text-align:center; font-size:10px; font-weight:700; color:var(--ink-muted); padding:2px 0; }
+.sal-att-grid span.h.sat{ color:var(--accent-red); }
+.sal-day{
+  aspect-ratio:1/1; border-radius:10px; border:1px solid var(--border-color); background:transparent;
+  font-family:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; padding:0;
+  display:flex; align-items:center; justify-content:center; position:relative;
+}
+.sal-day.empty{ visibility:hidden; }
+.sal-day.sat{ color:var(--accent-red); }
+.sal-day.p{ background:var(--brand-purple-deep); border-color:var(--brand-purple-deep); color:#fff; }
+.sal-day.h{ background:rgba(217,154,22,.18); border-color:var(--status-pending); color:var(--status-pending); }
+.sal-day.h::after{ content:'½'; position:absolute; top:1px; right:4px; font-size:9px; }
+.sal-att-legend{ display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--ink-muted); margin-top:8px; }
+.sal-att-legend i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; }
+html.dark-mode .sal-day{ border-color:rgba(255,255,255,.12) !important; color:#eef0f3 !important; }
+html.dark-mode .sal-day.sat{ color:#ff8a8a !important; }
+html.dark-mode .sal-day.p{ background:#2fc17f !important; border-color:#2fc17f !important; color:#0e1114 !important; }
+html.dark-mode .sal-att{ border-color:rgba(255,255,255,.1) !important; }
+html.dark-mode .sal-att-legend, html.dark-mode .sal-att-grid span.h{ color:#a2a9b5 !important; }
+.dash-sal-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8px; }
+.dash-sal-stats div{ background:var(--surface-soft); border:1px solid var(--border); border-radius:12px; padding:9px 6px; text-align:center; }
+.dash-sal-stats span{ display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-muted); }
+.dash-sal-stats b{ display:block; font-size:13px; margin-top:3px; color:var(--ink); }
+.dash-sal-stats .net b{ color:var(--brand-purple-deep); }
+.dash-sal-stats .adv b{ color:var(--accent-red); }
+.dash-sal-btn{ margin:6px 0 4px; }
+html.dark-mode .dash-sal-stats div{ background:#15191d !important; border-color:rgba(255,255,255,.1) !important; }
+html.dark-mode .dash-sal-stats b{ color:#eef0f3 !important; }
+html.dark-mode .dash-sal-stats .net b{ color:#5fd3a6 !important; }
+html.dark-mode .dash-sal-stats .adv b{ color:#ff8a8a !important; }
+html.dark-mode .dash-sal-stats span{ color:#a2a9b5 !important; }
 </style>
 
 </head>
@@ -4112,6 +4160,7 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
       <span class="section-title-dot billing"></span>
       <h2>Dashboard</h2>
     </div>
+    <div id="dashSalaryCard"></div>
     <div id="dashboardContent">
       <div class="dashboard-empty">Loading dashboard&hellip;</div>
     </div>
@@ -4168,7 +4217,7 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
           </span>
           Staff Salary &amp; Advance
         </div>
-        <div class="settings-row-sub">Track each staff member's monthly salary, advances taken and the balance to pay, in Nepali dates.</div>
+        <div class="settings-row-sub">Monthly or daily-wage staff, attendance, advances and the balance to pay, in Nepali dates.</div>
       </div>
       <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="openSalarySheet()">Open Staff Salary</button>
     </div>
@@ -4364,7 +4413,14 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
           <input type="text" id="salNewName" placeholder="Staff full name" autocomplete="off">
         </div>
         <div class="input-group">
-          <label for="salNewSalary">Monthly Salary (NPR)</label>
+          <label>Salary Type</label>
+          <div class="sal-type-group" id="salTypeGroup">
+            <button type="button" class="sal-type-btn active" data-type="monthly" onclick="salSetNewType('monthly')">Monthly</button>
+            <button type="button" class="sal-type-btn" data-type="daily" onclick="salSetNewType('daily')">Daily Wage</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="salNewSalary" id="salNewSalaryLabel">Monthly Salary (NPR)</label>
           <input type="number" id="salNewSalary" min="0" inputmode="numeric" placeholder="0">
         </div>
         <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salAddStaff()">Add Staff</button>
@@ -4746,20 +4802,25 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
   }
 
   // =====================================================================
-  // Staff Salary & Advance — monthly salary, advances (with Nepali dates),
-  // balance to pay and paid status. Stored on this device (localStorage).
+  // Staff Salary & Advance — two pay types:
+  //   Monthly    : fixed amount per BS month
+  //   Daily Wage : rate x days worked (tap days in the attendance grid;
+  //                tap once = full day, twice = half day)
+  // Advances are deducted from what is earned. Stored on this device.
   // =====================================================================
   const SAL_KEY = 'sardarStaffSalary';
-  let salData = { staff: [], advances: [], paid: {} };
+  let salData = { staff: [], advances: [], paid: {}, att: {} };
   let salViewYear = null, salViewMonth = null;   // BS month being viewed
-  let salOpenForm = null;                         // staff id whose advance form is open
+  let salOpenForm = null;                         // staff id with advance form open
+  let salOpenAtt = null;                          // staff id with attendance grid open
+  let salNewType = 'monthly';
 
   function salLoad() {
     try {
       const raw = localStorage.getItem(SAL_KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        salData = { staff: p.staff || [], advances: p.advances || [], paid: p.paid || {} };
+        salData = { staff: p.staff || [], advances: p.advances || [], paid: p.paid || {}, att: p.att || {} };
       }
     } catch (e) {}
   }
@@ -4767,27 +4828,42 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
     try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
   }
   function salId() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function salNpr(n) { return 'NPR ' + (Number(n) || 0).toLocaleString('en-IN'); }
+  function salNpr(n) { return 'NPR ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-IN'); }
   function salEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function salMonthKey() { return salViewYear + '-' + String(salViewMonth + 1).padStart(2, '0'); }
+  function salKey(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
+  function salIsDaily(st) { return st.type === 'daily'; }
+  function salRate(st) { return Number(salIsDaily(st) ? st.rate : st.salary) || 0; }
 
-  // Does an AD iso date fall inside the BS month being viewed?
-  function salInViewMonth(iso) {
+  function salInMonth(iso, y, m) {
     const dt = dateOfIso(iso);
     const bs = dt && adToBs(dt);
-    return !!bs && bs.y === salViewYear && bs.m === salViewMonth;
+    return !!bs && bs.y === y && bs.m === m;
   }
+
+  // Everything a card / the dashboard needs for one staff member in one BS month
+  function salCompute(st, y, m) {
+    const advs = salData.advances.filter(function (a) { return a.staffId === st.id && salInMonth(a.iso, y, m); })
+      .sort(function (a, b) { return a.iso < b.iso ? -1 : 1; });
+    const advTotal = advs.reduce(function (t, a) { return t + a.amount; }, 0);
+    const attMap = salData.att[st.id + '|' + salKey(y, m)] || {};
+    const days = Object.keys(attMap).reduce(function (t, d) { return t + attMap[d]; }, 0);
+    const earned = salIsDaily(st) ? salRate(st) * days : salRate(st);
+    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, earned: earned, net: earned - advTotal,
+             paid: salData.paid[st.id + '|' + salKey(y, m)] || null };
+  }
+
+  function salCurrentBs() { return adToBs(new Date()) || { y: BS_MIN_YEAR, m: 0, d: 1 }; }
 
   window.openSalarySheet = function () {
     salLoad();
-    const bs = adToBs(new Date()) || { y: BS_MIN_YEAR, m: 0, d: 1 };
-    if (salViewYear === null) { salViewYear = bs.y; salViewMonth = bs.m; }
-    salOpenForm = null;
+    if (salViewYear === null) { const bs = salCurrentBs(); salViewYear = bs.y; salViewMonth = bs.m; }
+    salOpenForm = null; salOpenAtt = null;
     salRender();
     document.getElementById('salOverlay').classList.add('show');
   };
   window.closeSalarySheet = function () {
     document.getElementById('salOverlay').classList.remove('show');
+    salRenderDashCard();
   };
   document.getElementById('salOverlay').addEventListener('click', function (e) {
     if (e.target === this) closeSalarySheet();
@@ -4798,18 +4874,28 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
     if (m > 11) { m = 0; y++; }
     if (m < 0) { m = 11; y--; }
     if (y < BS_MIN_YEAR || y > BS_MAX_YEAR) return;
-    salViewMonth = m; salViewYear = y; salOpenForm = null;
+    salViewMonth = m; salViewYear = y; salOpenForm = null; salOpenAtt = null;
     salRender();
+  };
+
+  window.salSetNewType = function (type) {
+    salNewType = type;
+    document.querySelectorAll('#salTypeGroup .sal-type-btn').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-type') === type);
+    });
+    document.getElementById('salNewSalaryLabel').textContent = type === 'daily' ? 'Daily Wage (NPR per day)' : 'Monthly Salary (NPR)';
   };
 
   window.salAddStaff = function () {
     const nameEl = document.getElementById('salNewName');
     const salEl = document.getElementById('salNewSalary');
     const name = nameEl.value.trim();
-    const salary = Number(salEl.value);
+    const amount = Number(salEl.value);
     if (!name) { appAlert('Enter the staff member\'s name.'); return; }
-    if (!(salary >= 0) || salEl.value === '') { appAlert('Enter a monthly salary (0 or more).'); return; }
-    salData.staff.push({ id: salId(), name: name, salary: salary });
+    if (salEl.value === '' || !(amount >= 0)) { appAlert('Enter the ' + (salNewType === 'daily' ? 'daily wage' : 'monthly salary') + ' (0 or more).'); return; }
+    const st = { id: salId(), name: name, type: salNewType };
+    if (salNewType === 'daily') st.rate = amount; else st.salary = amount;
+    salData.staff.push(st);
     salSave();
     nameEl.value = ''; salEl.value = '';
     salRender();
@@ -4818,22 +4904,24 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
   window.salEditSalary = function (id) {
     const st = salData.staff.find(function (x) { return x.id === id; });
     if (!st) return;
-    const v = window.prompt('Monthly salary for ' + st.name + ' (NPR):', st.salary);
+    const v = window.prompt((salIsDaily(st) ? 'Daily wage' : 'Monthly salary') + ' for ' + st.name + ' (NPR):', salRate(st));
     if (v === null) return;
     const n = Number(v);
-    if (isNaN(n) || n < 0) { appAlert('Enter a valid amount.'); return; }
-    st.salary = n;
+    if (v.trim() === '' || isNaN(n) || n < 0) { appAlert('Enter a valid amount.'); return; }
+    if (salIsDaily(st)) st.rate = n; else st.salary = n;
     salSave(); salRender();
   };
 
   window.salRemoveStaff = function (id) {
     const st = salData.staff.find(function (x) { return x.id === id; });
     if (!st) return;
-    appConfirm('Remove ' + st.name + ' and all their advance records?').then(function (ok) {
+    appConfirm('Remove ' + st.name + ' and all their advance and attendance records?').then(function (ok) {
       if (!ok) return;
       salData.staff = salData.staff.filter(function (x) { return x.id !== id; });
       salData.advances = salData.advances.filter(function (a) { return a.staffId !== id; });
-      Object.keys(salData.paid).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete salData.paid[k]; });
+      [salData.paid, salData.att].forEach(function (o) {
+        Object.keys(o).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete o[k]; });
+      });
       salSave(); salRender();
     });
   };
@@ -4841,10 +4929,38 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
   window.salToggleAdvForm = function (id) {
     salOpenForm = salOpenForm === id ? null : id;
     salRender();
-    if (salOpenForm) {
-      const el = document.getElementById('salAdvAmt-' + id);
-      if (el) el.focus();
+    if (salOpenForm) { const el = document.getElementById('salAdvAmt-' + id); if (el) el.focus(); }
+  };
+
+  window.salToggleAtt = function (id) {
+    salOpenAtt = salOpenAtt === id ? null : id;
+    salRender();
+  };
+
+  // none -> full day -> half day -> none
+  window.salTapDay = function (id, day) {
+    const key = id + '|' + salKey(salViewYear, salViewMonth);
+    const map = salData.att[key] || (salData.att[key] = {});
+    const cur = map[day] || 0;
+    if (cur === 0) map[day] = 1; else if (cur === 1) map[day] = 0.5; else delete map[day];
+    if (!Object.keys(map).length) delete salData.att[key];
+    salSave(); salRender();
+  };
+
+  window.salAllPresent = function (id) {
+    const key = id + '|' + salKey(salViewYear, salViewMonth);
+    const dim = bsDaysInMonth(salViewYear, salViewMonth);
+    const map = {};
+    for (let d = 1; d <= dim; d++) {
+      if (bsToAd(salViewYear, salViewMonth, d).getDay() !== 6) map[d] = 1;   // Saturday = weekly off
     }
+    salData.att[key] = map;
+    salSave(); salRender();
+  };
+
+  window.salClearAtt = function (id) {
+    delete salData.att[id + '|' + salKey(salViewYear, salViewMonth)];
+    salSave(); salRender();
   };
 
   window.salAddAdvance = function (id) {
@@ -4855,7 +4971,6 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
     const iso = dateEl.dataset.iso || isoOfDate(new Date());
     if (!(amount > 0)) { appAlert('Enter the advance amount.'); return; }
     salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, note: noteEl.value.trim() });
-    // jump to the month of the advance so it is visible right away
     const bs = adToBs(dateOfIso(iso));
     if (bs) { salViewYear = bs.y; salViewMonth = bs.m; }
     salOpenForm = null;
@@ -4870,61 +4985,68 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
     });
   };
 
-  function salStaffMonth(st) {
-    const advs = salData.advances.filter(function (a) { return a.staffId === st.id && salInViewMonth(a.iso); })
-      .sort(function (a, b) { return a.iso < b.iso ? -1 : 1; });
-    const advTotal = advs.reduce(function (t, a) { return t + a.amount; }, 0);
-    return { advs: advs, advTotal: advTotal, net: st.salary - advTotal, paid: salData.paid[st.id + '|' + salMonthKey()] || null };
-  }
-
   window.salTogglePaid = function (id) {
     const st = salData.staff.find(function (x) { return x.id === id; });
     if (!st) return;
-    const key = id + '|' + salMonthKey();
-    if (salData.paid[key]) {
-      delete salData.paid[key];
-      salSave(); salRender();
-      return;
-    }
-    const m = salStaffMonth(st);
-    appConfirm('Mark ' + st.name + '\'s ' + BS_MONTHS[salViewMonth] + ' salary as paid (' + salNpr(m.net) + ')?').then(function (ok) {
+    const key = id + '|' + salKey(salViewYear, salViewMonth);
+    if (salData.paid[key]) { delete salData.paid[key]; salSave(); salRender(); return; }
+    const c = salCompute(st, salViewYear, salViewMonth);
+    appConfirm('Mark ' + st.name + '\'s ' + BS_MONTHS[salViewMonth] + ' salary as paid (' + salNpr(c.net) + ')?').then(function (ok) {
       if (!ok) return;
-      salData.paid[key] = { iso: isoOfDate(new Date()), amount: m.net };
+      salData.paid[key] = { iso: isoOfDate(new Date()), amount: c.net };
       salSave(); salRender();
     });
   };
 
-  function salRender() {
-    const dim = bsDaysInMonth(salViewYear, salViewMonth);
-    const first = bsToAd(salViewYear, salViewMonth, 1);
-    const last = bsToAd(salViewYear, salViewMonth, dim);
-    document.getElementById('salMonthTitle').innerHTML =
-      BS_MONTHS[salViewMonth] + ' ' + salViewYear +
-      '<small>' + BS_MONTHS_NP[salViewMonth] + ' &middot; ' + AD_MONTH_SHORT[first.getMonth()] + (first.getMonth() !== last.getMonth() ? '/' + AD_MONTH_SHORT[last.getMonth()] : '') + ' ' + last.getFullYear() + '</small>';
+  function salMonthTitleHtml(y, m, small) {
+    const dim = bsDaysInMonth(y, m);
+    const first = bsToAd(y, m, 1), last = bsToAd(y, m, dim);
+    return BS_MONTHS[m] + ' ' + y + (small ? '<small>' + BS_MONTHS_NP[m] + ' &middot; ' + AD_MONTH_SHORT[first.getMonth()] + (first.getMonth() !== last.getMonth() ? '/' + AD_MONTH_SHORT[last.getMonth()] : '') + ' ' + last.getFullYear() + '</small>' : '');
+  }
 
-    let totSalary = 0, totAdv = 0;
-    let html = '';
+  function salAttendanceHtml(st, c) {
+    const dim = bsDaysInMonth(salViewYear, salViewMonth);
+    const firstWd = bsToAd(salViewYear, salViewMonth, 1).getDay();
+    let h = '<div class="sal-att-grid">';
+    ['आइत','सोम','मंगल','बुध','बिहि','शुक्र','शनि'].forEach(function (n, i) { h += '<span class="h' + (i === 6 ? ' sat' : '') + '">' + n + '</span>'; });
+    for (let i = 0; i < firstWd; i++) h += '<button type="button" class="sal-day empty" disabled></button>';
+    for (let d = 1; d <= dim; d++) {
+      const v = c.attMap[d] || 0;
+      const cls = 'sal-day' + (v === 1 ? ' p' : v === 0.5 ? ' h' : '') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '');
+      h += '<button type="button" class="' + cls + '" onclick="salTapDay(\'' + st.id + '\',' + d + ')">' + d + '</button>';
+    }
+    h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span>Tap a day to change</span></div>' +
+      '<div class="sal-actions"><button type="button" class="history-card-btn-view" onclick="salAllPresent(\'' + st.id + '\')">All Present (except Sat)</button>' +
+      '<button type="button" class="history-card-btn-delete" onclick="salClearAtt(\'' + st.id + '\')">Clear</button></div>';
+    return h;
+  }
+
+  function salRender() {
+    document.getElementById('salMonthTitle').innerHTML = salMonthTitleHtml(salViewYear, salViewMonth, true);
+    let totEarned = 0, totAdv = 0, html = '';
     if (!salData.staff.length) {
       html = '<div class="sal-empty">No staff added yet. Add a staff member below to start tracking salary and advances.</div>';
     }
     salData.staff.forEach(function (st) {
-      const m = salStaffMonth(st);
-      totSalary += st.salary;
-      totAdv += m.advTotal;
-      const advHtml = m.advs.length ? m.advs.map(function (a) {
+      const c = salCompute(st, salViewYear, salViewMonth);
+      const daily = salIsDaily(st);
+      totEarned += c.earned; totAdv += c.advTotal;
+      const advHtml = c.advs.length ? c.advs.map(function (a) {
         return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + a.id + '\')" aria-label="Delete advance">&times;</button></div>';
       }).join('') : '<div class="sal-sub">No advance taken this month.</div>';
-      const formOpen = salOpenForm === st.id;
+      const formOpen = salOpenForm === st.id, attOpen = salOpenAtt === st.id;
       html += '<div class="sal-card">' +
-        '<div class="sal-card-top"><div><div class="sal-name">' + salEsc(st.name) + '</div>' +
-        '<div class="sal-sub">Monthly salary ' + salNpr(st.salary) + '</div></div>' +
-        '<span class="sal-pill ' + (m.paid ? 'paid' : 'due') + '">' + (m.paid ? 'Paid ' + salEsc(formatDateHuman(m.paid.iso)) : 'Not paid') + '</span></div>' +
+        '<div class="sal-card-top"><div><div class="sal-name">' + salEsc(st.name) + '<span class="sal-tag ' + (daily ? 'daily' : '') + '">' + (daily ? 'Daily' : 'Monthly') + '</span></div>' +
+        '<div class="sal-sub">' + (daily ? salNpr(salRate(st)) + ' per day' : 'Monthly salary ' + salNpr(salRate(st))) + '</div></div>' +
+        '<span class="sal-pill ' + (c.paid ? 'paid' : 'due') + '">' + (c.paid ? 'Paid ' + salEsc(formatDateHuman(c.paid.iso)) : 'Not paid') + '</span></div>' +
         '<div class="sal-rows">' +
-          '<div class="sal-row"><span>Salary</span><b>' + salNpr(st.salary) + '</b></div>' +
-          '<div class="sal-row neg"><span>Advance taken</span><b>- ' + salNpr(m.advTotal) + '</b></div>' +
-          '<div class="sal-row net"><span>' + (m.net < 0 ? 'Over-advanced' : 'Balance to pay') + '</span><b' + (m.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(m.net) + '</b></div>' +
+          (daily ? '<div class="sal-row"><span>Days worked</span><b>' + c.days + ' &times; ' + salNpr(salRate(st)) + '</b></div>' : '') +
+          '<div class="sal-row"><span>' + (daily ? 'Earned' : 'Salary') + '</span><b>' + salNpr(c.earned) + '</b></div>' +
+          '<div class="sal-row neg"><span>Advance taken</span><b>- ' + salNpr(c.advTotal) + '</b></div>' +
+          '<div class="sal-row net"><span>' + (c.net < 0 ? 'Over-advanced' : 'Balance to pay') + '</span><b' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</b></div>' +
         '</div>' +
+        '<div class="sal-att' + (attOpen ? ' open' : '') + '">' + (attOpen && daily ? salAttendanceHtml(st, c) : '') + '</div>' +
         '<div class="sal-adv-list">' + advHtml + '</div>' +
         '<div class="sal-form' + (formOpen ? ' open' : '') + '">' +
           '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Advance Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
@@ -4933,38 +5055,67 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
           '<button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salAddAdvance(\'' + st.id + '\')">Save Advance</button>' +
         '</div>' +
         '<div class="sal-actions">' +
+          (daily ? '<button type="button" class="history-card-btn-view" onclick="salToggleAtt(\'' + st.id + '\')">' + (attOpen ? 'Hide Attendance' : 'Attendance') + '</button>' : '') +
           '<button type="button" class="history-card-btn-view" onclick="salToggleAdvForm(\'' + st.id + '\')">' + (formOpen ? 'Cancel' : '+ Give Advance') + '</button>' +
-          '<button type="button" class="history-card-btn-status" onclick="salTogglePaid(\'' + st.id + '\')">' + (m.paid ? 'Undo Paid' : 'Mark Salary Paid') + '</button>' +
-          '<button type="button" class="history-card-btn-edit" onclick="salEditSalary(\'' + st.id + '\')">Edit Salary</button>' +
+          '<button type="button" class="history-card-btn-status" onclick="salTogglePaid(\'' + st.id + '\')">' + (c.paid ? 'Undo Paid' : 'Mark Salary Paid') + '</button>' +
+          '<button type="button" class="history-card-btn-edit" onclick="salEditSalary(\'' + st.id + '\')">' + (daily ? 'Edit Wage' : 'Edit Salary') + '</button>' +
           '<button type="button" class="history-card-btn-delete" onclick="salRemoveStaff(\'' + st.id + '\')">Remove</button>' +
         '</div></div>';
     });
     document.getElementById('salList').innerHTML = html;
-    document.getElementById('salTotSalary').textContent = salNpr(totSalary);
+    document.getElementById('salTotSalary').textContent = salNpr(totEarned);
     document.getElementById('salTotAdvance').textContent = salNpr(totAdv);
-    document.getElementById('salTotNet').textContent = salNpr(totSalary - totAdv);
-    // default the date of any open advance form to today (BS)
+    document.getElementById('salTotNet').textContent = salNpr(totEarned - totAdv);
     if (salOpenForm) {
       const d = document.getElementById('salAdvDate-' + salOpenForm);
       if (d && !d.dataset.iso) setFieldISO(d.id, isoOfDate(new Date()));
     }
   }
 
+  // ---- Dashboard card: current BS month at a glance ----
+  window.salRenderDashCard = function () {
+    const host = document.getElementById('dashSalaryCard');
+    if (!host) return;
+    salLoad();
+    const bs = salCurrentBs();
+    let earned = 0, adv = 0, rows = '';
+    salData.staff.forEach(function (st) {
+      const c = salCompute(st, bs.y, bs.m);
+      earned += c.earned; adv += c.advTotal;
+      const sub = salIsDaily(st) ? c.days + ' day' + (c.days === 1 ? '' : 's') + ' worked' : 'Monthly';
+      rows += '<div class="dashboard-mini-row clickable" onclick="openSalarySheet()"><span><span class="name">' + salEsc(st.name) + '</span><br><span class="sub">' + sub +
+        (c.advTotal ? ' &middot; advance ' + salNpr(c.advTotal) : '') + (c.paid ? ' &middot; paid' : '') + '</span></span>' +
+        '<span class="dashboard-mini-row-right"><span class="amt"' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</span></span></div>';
+    });
+    let html = '<div class="dashboard-section-card" style="--card-delay:0.05s"><div class="dashboard-section-title">Staff Salary &middot; ' + salMonthTitleHtml(bs.y, bs.m, false) + '</div>';
+    if (salData.staff.length) {
+      html += '<div class="dash-sal-stats"><div><span>Earned</span><b>' + salNpr(earned) + '</b></div><div class="adv"><span>Advance</span><b>' + salNpr(adv) + '</b></div><div class="net"><span>To Pay</span><b>' + salNpr(earned - adv) + '</b></div></div>' + rows;
+    } else {
+      html += '<div class="dashboard-empty">No staff added yet.</div>';
+    }
+    html += '<button type="button" class="history-card-btn-view dash-sal-btn" style="width:100%;justify-content:center;" onclick="openSalarySheet()">' + (salData.staff.length ? 'Manage Salary, Attendance &amp; Advance' : 'Add Staff') + '</button></div>';
+    host.innerHTML = html;
+  };
+
   window.salExportCsv = function () {
     salLoad();
     const cell = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    const rows = [['Type', 'Staff', 'Date (BS)', 'Date (AD)', 'Amount (NPR)', 'Note']];
+    const nameOf = function (id) { const st = salData.staff.find(function (x) { return x.id === id; }); return st ? st.name : ''; };
+    const rows = [['Type', 'Staff', 'Pay Type', 'Date (BS)', 'Date (AD)', 'Amount (NPR)', 'Note']];
     salData.staff.forEach(function (st) {
-      rows.push(['Monthly Salary', st.name, '', '', st.salary, '']);
+      rows.push([salIsDaily(st) ? 'Daily Wage' : 'Monthly Salary', st.name, salIsDaily(st) ? 'Daily' : 'Monthly', '', '', salRate(st), '']);
+    });
+    Object.keys(salData.att).forEach(function (k) {
+      const parts = k.split('|'), map = salData.att[k];
+      const days = Object.keys(map).reduce(function (t, d) { return t + map[d]; }, 0);
+      rows.push(['Attendance (' + parts[1] + ' BS)', nameOf(parts[0]), 'Daily', '', '', days, 'days worked']);
     });
     salData.advances.slice().sort(function (a, b) { return a.iso < b.iso ? -1 : 1; }).forEach(function (a) {
-      const st = salData.staff.find(function (x) { return x.id === a.staffId; });
-      rows.push(['Advance', st ? st.name : '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
+      rows.push(['Advance', nameOf(a.staffId), '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
     });
     Object.keys(salData.paid).forEach(function (k) {
       const p = salData.paid[k], parts = k.split('|');
-      const st = salData.staff.find(function (x) { return x.id === parts[0]; });
-      rows.push(['Salary Paid (' + parts[1] + ' BS)', st ? st.name : '', formatDateHuman(p.iso), p.iso, p.amount, '']);
+      rows.push(['Salary Paid (' + parts[1] + ' BS)', nameOf(parts[0]), '', formatDateHuman(p.iso), p.iso, p.amount, '']);
     });
     const csv = rows.map(function (r) { return r.map(cell).join(','); }).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -7007,6 +7158,7 @@ html.dark-mode .sal-rows, html.dark-mode .sal-form, html.dark-mode .sal-row.net{
 
   function renderDashboard() {
     const content = document.getElementById('dashboardContent');
+    if (window.salRenderDashCard) window.salRenderDashCard();
     const _cachedDash = getFallbackHistory();
     if (_cachedDash.length) buildDashboard(_cachedDash, false);
     else content.innerHTML = inlineLoadingMarkup('Loading dashboard&hellip;');
