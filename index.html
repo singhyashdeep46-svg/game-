@@ -655,6 +655,13 @@ html.kb-open .summary-bar { opacity: 0; visibility: hidden; pointer-events: none
 .history-card-btn-whatsapp { background: var(--green-tint); color: var(--green-ink); }
 .history-card-btn-view { background: var(--accent-tint); color: var(--accent); }
 .history-card-btn-view svg, .history-card-btn-whatsapp svg { margin: 0 !important; width: 17px !important; height: 17px !important; }
+.wa-label { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; text-align: left; }
+.wa-label small { font-size: 11.5px; font-weight: 500; opacity: .8; margin-top: 1px; }
+.wa-label small:empty { display: none; }
+.wa-sent-pop { animation: waPop .45s cubic-bezier(.2,.9,.3,1.3); }
+@keyframes waPop { 0% { transform: scale(.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .wa-sent-pop { animation: none; } }
+.sheet-status.just-done { animation: waPop .45s cubic-bezier(.2,.9,.3,1.3); }
 .history-card-btn-whatsapp:active, .history-card-btn-view:active { transform: scale(0.97); }
 .history-card-btn-delete { background: var(--red-tint); color: var(--red-ink); border: 0; border-radius: var(--r-md); min-height: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; }
 .history-card-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; border-top: 0.5px solid var(--sep); }
@@ -1325,7 +1332,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
 
       <button type="button" class="modal-action-btn-whatsapp" style="margin-top:10px;" onclick="sendReceiptWhatsAppFromPreview()">
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
-        Send Receipt via WhatsApp
+        <span class="wa-label">Send via WhatsApp<small class="wa-num" data-wa="preview"></small></span>
       </button>
       <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="printReceiptFromPreview()">
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm4 15h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0 -2m0 -4h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0 -2m-7 -7h-1a1 1 0 1 0 0 2h1a1 1 0 1 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
@@ -1530,7 +1537,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     </div>
     <button type="button" class="modal-action-btn-whatsapp" onclick="sendReceiptWhatsAppFromModal()">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
-      Send Receipt via WhatsApp
+      <span class="wa-label">Send via WhatsApp<small class="wa-num" data-wa="modal"></small></span>
     </button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="shareReceiptImageFromModal()">Share Receipt as Image</button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="printReceiptFromModal()">
@@ -1624,7 +1631,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
 
     <button type="button" class="modal-action-btn-whatsapp" style="margin-top:4px;" onclick="sendReceiptWhatsAppFromSuccess()">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
-      Send Receipt via WhatsApp
+      <span class="wa-label">Send via WhatsApp<small class="wa-num" data-wa="success"></small></span>
     </button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="shareReceiptImageFromSuccess()">Share Receipt as Image</button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:12px;" onclick="printReceiptFromSuccess()">
@@ -4076,6 +4083,16 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
   window.shareReceiptImageFromModal = function () { if (currentModalIndex != null) shareReceiptImageForOrder(renderedHistory[currentModalIndex]); };
   window.shareReceiptImageFromSuccess = function () { shareReceiptImageForOrder(lastSubmittedOrder); };
 
+  function setWaNum(kind, order) {
+    const el = document.querySelector('.wa-num[data-wa="' + kind + '"]');
+    if (!el) return;
+    const ph = order && order.phoneNumber && order.phoneNumber !== '-' ? String(order.phoneNumber).trim() : '';
+    el.textContent = ph ? 'to ' + ph : '';
+  }
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'phoneNumber') setWaNum('preview', { phoneNumber: e.target.value });
+  });
+
   window.sendReceiptWhatsApp = function (index) {
     const order = renderedHistory[index];
     if (!order) return;
@@ -4351,6 +4368,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
 
     const modalContent = document.getElementById('modalReceiptContent');
     modalContent.innerHTML = generateReceiptHTML(order);
+    setWaNum('modal', order);
 
     const modal = document.getElementById('receiptModal');
     modal.classList.add('show');
@@ -4396,57 +4414,56 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     }
   }
 
+  // Instant UI: patch the order in memory + caches and redraw from memory,
+  // then sync to Google Sheets in the background (no full-sheet reload).
+  function applyStatusInstantly(ticketId, patch) {
+    const apply = function (list) {
+      if (!Array.isArray(list)) return;
+      list.forEach(function (o, i) { if (o && o.ticketId === ticketId) list[i] = Object.assign({}, o, patch); });
+    };
+    apply(allHistoryOrders);
+    apply(_sheetMemory);
+    try {
+      const c = getCachedSheetHistory();
+      apply(c);
+      localStorage.setItem(SHEET_CACHE_KEY, JSON.stringify(c));
+    } catch (e) {}
+    filterHistoryList();
+    const pops = document.querySelectorAll('#historyListContainer .history-card');
+    renderedHistory.forEach(function (o, i) {
+      if (o.ticketId === ticketId && pops[i]) pops[i].querySelectorAll('.sheet-status.synced').forEach(function (b) { const t = b.textContent.trim(); if ((patch.fullyPaid && t.indexOf('Fully Paid') === 0) || (patch.delivered && t.indexOf('Delivered') === 0)) b.classList.add('just-done'); });
+    });
+  }
+
+  function changeOrderStatus(order, patch, localExtra) {
+    const full = Object.assign({}, patch, localExtra);
+    applyStatusInstantly(order.ticketId, full);
+    if (renderedHistoryIsOffline) {
+      updateLocalOrderStatus(order.ticketId, full);
+      return;
+    }
+    updateOrderStatus(order.ticketId, patch).catch(function (err) {
+      console.error(err);
+      updateLocalOrderStatus(order.ticketId, full);
+      appAlert('Could not reach Google Sheets, so this was saved on this device only. It will need to be re-synced once you\'re back online.');
+    });
+  }
+
   window.markDelivered = function(index, skipConfirm) {
     const order = renderedHistory[index];
     if (!order) return;
-
     (skipConfirm ? Promise.resolve(true) : appConfirm('Mark this order as Delivered?')).then(function (confirmed) {
       if (!confirmed) return;
-
-      if (renderedHistoryIsOffline) {
-        updateLocalOrderStatus(order.ticketId, { delivered: true, deliveredAt: todayFormatted() });
-        renderHistoryList();
-        return;
-      }
-
-      updateOrderStatus(order.ticketId, { delivered: true })
-        .then(function () {
-          renderHistoryList();
-        })
-        .catch(function (err) {
-          console.error(err);
-          // Backend unreachable: still reflect the change locally so the
-          // button doesn't appear broken, and keep it queued for retry.
-          updateLocalOrderStatus(order.ticketId, { delivered: true, deliveredAt: todayFormatted() });
-          appAlert('Could not reach Google Sheets, so this was saved on this device only. It will need to be re-synced once you\'re back online.');
-          renderHistoryList();
-        });
+      changeOrderStatus(order, { delivered: true }, { deliveredAt: todayFormatted() });
     });
   }
 
   window.markFullyPaid = function(index) {
     const order = renderedHistory[index];
     if (!order) return;
-
     appConfirm('Mark this order as Fully Paid?').then(function (confirmed) {
       if (!confirmed) return;
-
-      if (renderedHistoryIsOffline) {
-        updateLocalOrderStatus(order.ticketId, { fullyPaid: true, paidAt: todayFormatted() });
-        renderHistoryList();
-        return;
-      }
-
-      updateOrderStatus(order.ticketId, { fullyPaid: true })
-        .then(function () {
-          renderHistoryList();
-        })
-        .catch(function (err) {
-          console.error(err);
-          updateLocalOrderStatus(order.ticketId, { fullyPaid: true, paidAt: todayFormatted() });
-          appAlert('Could not reach Google Sheets, so this was saved on this device only. It will need to be re-synced once you\'re back online.');
-          renderHistoryList();
-        });
+      changeOrderStatus(order, { fullyPaid: true }, { paidAt: todayFormatted() });
     });
   }
 
@@ -5536,7 +5553,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
 
           <button type="button" class="history-card-btn-whatsapp" onclick="sendReceiptWhatsApp(${index})">
             <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
-            Send Receipt via WhatsApp
+            <span class="wa-label">Send via WhatsApp<small>${order.phoneNumber && order.phoneNumber !== '-' ? 'to ' + order.phoneNumber : ''}</small></span>
           </button>
 
           <button type="button" class="history-card-btn-view" onclick="shareReceiptImageAt(${index})">Share Receipt as Image</button>
@@ -5764,6 +5781,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
         document.getElementById('successOverlay').classList.add('show');
 
         lastSubmittedOrder = orderLog;
+        setWaNum('success', orderLog);
 
         editingTicketId = null;
         editingOrderSnapshot = null;
