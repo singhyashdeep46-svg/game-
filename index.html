@@ -1532,6 +1532,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
       Send Receipt via WhatsApp
     </button>
+    <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="shareReceiptImageFromModal()">Share Receipt as Image</button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="printReceiptFromModal()">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm4 15h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0 -2m0 -4h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0 -2m-7 -7h-1a1 1 0 1 0 0 2h1a1 1 0 1 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
       Print / Save as PDF
@@ -1625,6 +1626,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
       Send Receipt via WhatsApp
     </button>
+    <button type="button" class="modal-action-btn-secondary" style="margin-top:8px;" onclick="shareReceiptImageFromSuccess()">Share Receipt as Image</button>
     <button type="button" class="modal-action-btn-secondary" style="margin-top:12px;" onclick="printReceiptFromSuccess()">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm4 15h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0 -2m0 -4h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0 -2m-7 -7h-1a1 1 0 1 0 0 2h1a1 1 0 1 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
       Print / Save as PDF
@@ -3949,6 +3951,133 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     printReceiptForOrder(built.order);
   };
 
+
+  // ---- Share receipt as an image (drawn on a canvas, shared via the phone's share sheet) ----
+  function buildReceiptCanvas(order) {
+    const W = 420, SC = 3, PAD = 22, FONT = '-apple-system, "SF Pro Text", "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif';
+    const total = Number(order.totalPrice) || 0, advance = Number(order.advancePaid) || 0;
+    const balance = Math.max(0, total - advance);
+    const paid = order.fullyPaid === true || (total > 0 && advance >= total), delivered = order.delivered === true;
+    const npr = function (n) { return 'NPR ' + Number(n).toLocaleString('en-IN'); };
+    const parts = function (str) { const m = String(waDate(str)).match(/^(.*?) \((.*)\)$/); return m ? [m[1], m[2]] : [String(waDate(str)), '']; };
+
+    const due = parseDMY(cleanDeliveryDate(order.deliveryDate), '-');
+    let chip = { t: '', c: '#007aff', bg: 'rgba(0,122,255,.12)' };
+    if (delivered) chip = { t: 'Delivered', c: '#1f9d45', bg: 'rgba(52,199,89,.16)' };
+    else if (due) {
+      const d = daysBetween(new Date(), due);
+      chip = d < 0 ? { t: Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' overdue', c: '#d70015', bg: 'rgba(255,59,48,.12)' }
+        : { t: d === 0 ? 'Due today' : d === 1 ? 'Due tomorrow' : 'In ' + d + ' days', c: '#007aff', bg: 'rgba(0,122,255,.12)' };
+    }
+
+    const items = (order.itemTypes || []).map(function (type, i) {
+      let m = (order.measurementsList && order.measurementsList[i]) || {};
+      if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { m = { Measurement: m }; } }
+      if (m && m.fields) m = m.fields;
+      const look = [(order.fabricTypes || [])[i], (order.colorDesigns || [])[i]].filter(function (x) { return x && x !== '-'; }).join(' \u00b7 ');
+      const meas = Object.entries(m || {}).filter(function (pr) { return pr[1] !== '' && pr[1] != null; }).map(function (pr) { return pr[0] + ' ' + pr[1]; }).join('  \u00b7  ');
+      const note = (order.notesList || [])[i];
+      return { type: type || 'Item', look: look, meas: meas, note: note && note !== '-' ? note : '' };
+    });
+
+    function draw(ctx, H) {
+      const R = function (x, y, w, h, r, fill) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); ctx.fillStyle = fill; ctx.fill(); };
+      const T = function (txt, x, y, size, weight, color, align) { ctx.font = weight + ' ' + size + 'px ' + FONT; ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(txt, x, y); };
+      const wrap = function (txt, x, y, size, weight, color, maxW, lh) {
+        ctx.font = weight + ' ' + size + 'px ' + FONT; ctx.fillStyle = color; ctx.textAlign = 'left';
+        let line = '';
+        String(txt).split(' ').forEach(function (w) {
+          const test = line ? line + ' ' + w : w;
+          if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, y); y += lh; line = w; } else line = test;
+        });
+        ctx.fillText(line, x, y); return y + lh;
+      };
+      const chipDraw = function (txt, xRight, y, c, bg) {
+        ctx.font = '700 11px ' + FONT; const w = ctx.measureText(txt).width + 18;
+        R(xRight - w, y, w, 22, 11, bg); T(txt, xRight - w / 2, y + 15, 11, 700, c, 'center');
+      };
+      ctx.fillStyle = '#f2f2f7'; ctx.fillRect(0, 0, W, H);
+      const CX = 12, CW = W - 24; let y = 12;
+      R(CX, y, CW, H - 24, 22, '#ffffff');
+      const L = CX + PAD, Rr = CX + CW - PAD;
+      y += 40;
+      T('SARDAR TAILORING', W / 2, y, 21, 800, '#1c1c1e', 'center'); y += 20;
+      T('Bespoke Suit & Tailoring Shop', W / 2, y, 12, 500, '#8e8e93', 'center'); y += 20;
+      ctx.fillStyle = '#e5e5ea'; ctx.fillRect(L, y, Rr - L, 1); y += 24;
+      // customer + ticket
+      T(order.customerName || '', L, y, 18, 700, '#1c1c1e'); 
+      ctx.font = '700 12px ' + FONT; const tw = ctx.measureText(order.ticketId || '').width + 20;
+      R(Rr - tw, y - 16, tw, 24, 12, 'rgba(0,122,255,.12)'); T(order.ticketId || '', Rr - tw / 2, y, 12, 700, '#007aff', 'center');
+      y += 20; T(order.phoneNumber || '-', L, y, 13, 500, '#8e8e93'); y += 28;
+      // dates
+      const o = order.dateSubmitted ? parts(order.dateSubmitted) : null, r = parts(order.deliveryDate), mid = W / 2 + 4;
+      R(L, y, Rr - L, 74, 14, '#f2f2f7');
+      T('ORDERED', L + 14, y + 22, 10, 700, '#8e8e93'); T('READY BY', mid, y + 22, 10, 700, '#8e8e93');
+      if (o) { T(o[0], L + 14, y + 42, 14, 700, '#1c1c1e'); T(o[1], L + 14, y + 58, 11, 500, '#8e8e93'); }
+      T(r[0], mid, y + 42, 14, 700, '#1c1c1e'); T(r[1], mid, y + 58, 11, 500, '#8e8e93');
+      y += 74 + 14;
+      if (chip.t) { chipDraw(chip.t, Rr, y, chip.c, chip.bg); y += 22 + 16; } else y += 4;
+      // items
+      T('ITEMS', L, y, 11, 700, '#8e8e93'); y += 20;
+      items.forEach(function (it, i) {
+        R(L, y - 14, 22, 22, 11, '#007aff'); T(String(i + 1), L + 11, y + 1, 12, 700, '#ffffff', 'center');
+        T(it.type, L + 32, y + 2, 15, 700, '#1c1c1e'); y += 22;
+        if (it.look) y = wrap(it.look, L + 32, y, 13, 500, '#3a3a3c', Rr - L - 32, 18);
+        if (it.meas) y = wrap(it.meas, L + 32, y, 12.5, 500, '#6c6c70', Rr - L - 32, 17);
+        if (it.note) y = wrap('Note: ' + it.note, L + 32, y, 12, 500, '#8e8e93', Rr - L - 32, 17);
+        y += 10;
+      });
+      // payment
+      y += 4; R(L, y, Rr - L, 112, 14, '#f2f2f7');
+      const row = function (label, val, yy, bold, color) { T(label, L + 16, yy, bold ? 15 : 14, bold ? 700 : 500, '#3a3a3c'); T(val, Rr - 16, yy, bold ? 16 : 14, bold ? 800 : 600, color || '#1c1c1e', 'right'); };
+      row('Total', npr(total), y + 30); row('Advance paid', npr(advance), y + 56);
+      ctx.fillStyle = '#d1d1d6'; ctx.fillRect(L + 16, y + 68, Rr - L - 32, 1);
+      row(paid ? 'Balance' : 'Balance due', paid ? 'Paid in full' : npr(balance), y + 94, true, paid ? '#1f9d45' : '#d70015');
+      y += 112 + 26;
+      T('Thank you for choosing Sardar Tailoring', W / 2, y, 13, 600, '#3a3a3c', 'center'); y += 18;
+      T('Please show this ticket when collecting', W / 2, y, 11.5, 500, '#8e8e93', 'center'); y += 18;
+      if (SHOP_INFO.phone) { T(SHOP_INFO.phone, W / 2, y, 12, 600, '#007aff', 'center'); y += 18; }
+      if (SHOP_INFO.address) { T(SHOP_INFO.address, W / 2, y, 11.5, 500, '#8e8e93', 'center'); y += 18; }
+      return y + 28;
+    }
+    const probe = document.createElement('canvas').getContext('2d');
+    const H = draw(probe, 4000);
+    const cv = document.createElement('canvas');
+    cv.width = W * SC; cv.height = H * SC;
+    const ctx = cv.getContext('2d'); ctx.scale(SC, SC);
+    draw(ctx, H);
+    return cv;
+  }
+
+  function downloadReceiptBlob(blob, name) {
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function shareReceiptImageForOrder(order) {
+    if (!order) return;
+    let cv;
+    try { cv = buildReceiptCanvas(order); } catch (e) { console.error(e); appAlert('Could not create the receipt image.'); return; }
+    cv.toBlob(function (blob) {
+      if (!blob) { appAlert('Could not create the receipt image.'); return; }
+      const name = (order.ticketId || 'receipt') + '.png';
+      const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: buildShortWhatsAppCaption(order) }).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          downloadReceiptBlob(blob, name);
+        });
+      } else {
+        downloadReceiptBlob(blob, name);
+        appAlert('Receipt image saved. Attach it in WhatsApp from your gallery or downloads.');
+      }
+    }, 'image/png');
+  }
+  window.shareReceiptImageAt = function (index) { shareReceiptImageForOrder(renderedHistory[index]); };
+  window.shareReceiptImageFromModal = function () { if (currentModalIndex != null) shareReceiptImageForOrder(renderedHistory[currentModalIndex]); };
+  window.shareReceiptImageFromSuccess = function () { shareReceiptImageForOrder(lastSubmittedOrder); };
+
   window.sendReceiptWhatsApp = function (index) {
     const order = renderedHistory[index];
     if (!order) return;
@@ -5411,6 +5540,8 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
             <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.497 4.409a10 10 0 0 1 -10.36 16.828l-.223 -.098l-4.759 .849l-.11 .011a1 1 0 0 1 -.11 0l-.102 -.013l-.108 -.024l-.105 -.037l-.099 -.047l-.093 -.058l-.014 -.011l-.012 -.007l-.086 -.073l-.077 -.08l-.067 -.088l-.056 -.094l-.034 -.07l-.04 -.108l-.028 -.128l-.012 -.102a1 1 0 0 1 0 -.125l.012 -.1l.024 -.11l.045 -.122l1.433 -3.304l-.009 -.014a10 10 0 0 1 1.549 -12.454l.215 -.203a10 10 0 0 1 13.226 -.217m-8.997 3.09a1.5 1.5 0 0 0 -1.5 1.5v1a6 6 0 0 0 6 6h1a1.5 1.5 0 0 0 0 -3h-1l-.144 .007a1.5 1.5 0 0 0 -1.128 .697l-.042 .074l-.022 -.007a4.01 4.01 0 0 1 -2.435 -2.435l-.008 -.023l.075 -.041a1.5 1.5 0 0 0 .704 -1.272v-1a1.5 1.5 0 0 0 -1.5 -1.5" /></svg>
             Send Receipt via WhatsApp
           </button>
+
+          <button type="button" class="history-card-btn-view" onclick="shareReceiptImageAt(${index})">Share Receipt as Image</button>
 
           <button type="button" class="history-card-btn-view" onclick="viewHistoryTicket(${index})">
             <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm3 14h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2m0 -4h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2m-5 -4h-1a1 1 0 1 0 0 2h1a1 1 0 0 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
