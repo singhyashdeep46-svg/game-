@@ -3757,38 +3757,34 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     const isFullyPaid = order.fullyPaid === true || (total > 0 && advance >= total);
     const isDelivered = order.delivered === true;
     const npr = function (n) { return 'NPR ' + Number(n).toLocaleString('en-IN'); };
-    const LINE = '━━━━━━━━━━━━━━━━';
+    const LINE = '──────────────';
     const NUM = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
     // Days-left text for the delivery date
     const due = parseDMY(cleanDeliveryDate(order.deliveryDate), '-');
     let when = '';
-    if (isDelivered) when = ' · ✅ Delivered';
+    if (isDelivered) when = ' · Delivered';
     else if (due) {
       const diff = daysBetween(new Date(), due);
-      when = diff < 0 ? ' · ⚠️ ' + Math.abs(diff) + ' day' + (Math.abs(diff) === 1 ? '' : 's') + ' overdue'
+      when = diff < 0 ? ' · ' + Math.abs(diff) + ' day' + (Math.abs(diff) === 1 ? '' : 's') + ' overdue'
         : diff === 0 ? ' · today' : diff === 1 ? ' · tomorrow' : ' · in ' + diff + ' days';
     }
     // Nepali date in bold, English date in words in italics
     const fmtDate = function (txt) { return String(txt).replace(/^(.*?) \((.*)\)$/, '*$1* _($2)_'); };
-    const whenLine = when ? (/^ · (✅|⚠️)/.test(when) ? when.slice(3) : '⏳ ' + when.slice(3)) : '';
+    const whenLine = when ? when.slice(3) : '';
 
     const lines = [];
-    lines.push('🧵 *SARDAR TAILORING*');
-    lines.push('_Bespoke Suit & Tailoring Shop_');
+    lines.push('*SARDAR TAILORING*');
+    lines.push('Order Receipt');
     lines.push(LINE);
-    lines.push('');
-    lines.push('🎫 *' + order.ticketId + '*');
-    lines.push('👤 *' + order.customerName + '*');
-    lines.push('📞 ' + (order.phoneNumber || '-'));
-    lines.push('');
-    if (order.dateSubmitted) { lines.push('📅 *Ordered*'); lines.push(fmtDate(waDate(order.dateSubmitted))); lines.push(''); }
-    lines.push('🚚 *Ready by*');
-    lines.push(fmtDate(waDate(order.deliveryDate)));
-    if (whenLine) lines.push(whenLine);
-    lines.push('');
+    lines.push('Ticket No.  : *' + order.ticketId + '*');
+    lines.push('Customer    : ' + order.customerName);
+    if (order.phoneNumber) lines.push('Phone       : ' + order.phoneNumber);
+    if (order.dateSubmitted) lines.push('Order Date  : ' + fmtDate(waDate(order.dateSubmitted)));
+    lines.push('Delivery    : ' + fmtDate(waDate(order.deliveryDate)));
+    if (whenLine) lines.push('Status      : ' + whenLine);
     lines.push(LINE);
-    lines.push('👔 *YOUR ITEMS*');
+    lines.push('*ORDER DETAILS*');
     lines.push('');
 
     (order.itemTypes || []).forEach(function (itemType, i) {
@@ -3799,37 +3795,35 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
       const color = (order.colorDesigns && order.colorDesigns[i]) || '';
       const notes = (order.notesList && order.notesList[i]) || '';
       const photo = (order.referencePhotosList && order.referencePhotosList[i]) || '';
-      const look = [fabric, color].filter(function (x) { return x && x !== '-'; }).join(' · ');
+      const look = [fabric, color].filter(function (x) { return x && x !== '-'; }).join(', ');
       const meas = Object.entries(m || {}).filter(function (pr) { return pr[1] !== '' && pr[1] != null; })
-        .map(function (pr) { return pr[0] + ' ' + pr[1]; }).join(' · ');
+        .map(function (pr) { return pr[0] + ' ' + pr[1]; }).join(', ');
 
-      lines.push((NUM[i] || (i + 1) + '.') + ' *' + (itemType || 'Unselected') + '*');
-      if (look) lines.push('    🧶 ' + look);
-      if (meas) lines.push('    📏 ' + meas);
-      if (notes && notes !== '-') lines.push('    📝 ' + notes);
-      if (photo && photo.indexOf('http') === 0) lines.push('    🖼 ' + photo);
+      lines.push((i + 1) + '. *' + (itemType || 'Item') + '*');
+      if (look) lines.push('   Fabric: ' + look);
+      if (meas) lines.push('   Measurements: ' + meas);
+      if (notes && notes !== '-') lines.push('   Notes: ' + notes);
+      if (photo && photo.indexOf('http') === 0) lines.push('   Reference: ' + photo);
       lines.push('');
     });
 
-    // Money table in monospace so the amounts line up
-    const rowsPay = [['Total', npr(total)], ['Advance', npr(advance)], ['Balance', isFullyPaid ? 'NPR 0 (Paid)' : npr(balance)]];
+    const rowsPay = [['Total', npr(total)], ['Advance Paid', npr(advance)], ['Balance Due', isFullyPaid ? 'NPR 0 (Paid)' : npr(balance)]];
     const w = Math.max.apply(null, rowsPay.map(function (r) { return r[1].length; }));
     lines.push(LINE);
-    lines.push('💰 *PAYMENT*');
+    lines.push('*PAYMENT SUMMARY*');
     lines.push('```');
-    rowsPay.forEach(function (r) { lines.push((r[0] + '          ').slice(0, 10) + (r[1] + '').padStart(w, ' ')); });
+    rowsPay.forEach(function (r) { lines.push((r[0] + '            ').slice(0, 13) + (r[1] + '').padStart(w, ' ')); });
     lines.push('```');
-    lines.push(isDelivered ? (isFullyPaid ? '✅ *Delivered · Paid in full*' : '✅ *Delivered*') : (isFullyPaid ? '⏳ *In progress · Paid in full*' : '⏳ *In progress*'));
-    lines.push('');
+    lines.push(LINE);
 
-    if (isDelivered && isFullyPaid) lines.push('🙏 Thank you for choosing Sardar Tailoring!');
-    else if (isDelivered) lines.push('🙏 Thank you! A balance of ' + npr(balance) + ' is still due.');
-    else if (isFullyPaid) lines.push('🙏 Payment received in full. We\'ll message you when your order is ready.');
-    else lines.push('🙏 Thank you for your order! Please show this ticket number when collecting.');
+    if (isDelivered && isFullyPaid) lines.push('Thank you for choosing Sardar Tailoring. We look forward to serving you again.');
+    else if (isDelivered) lines.push('Thank you for your order. A balance of ' + npr(balance) + ' is still due.');
+    else if (isFullyPaid) lines.push('Payment received in full. We will inform you once your order is ready.');
+    else lines.push('Thank you for your order. Please present this ticket number at the time of collection.');
 
-    if (SHOP_INFO.address) lines.push('📍 ' + SHOP_INFO.address);
-    if (SHOP_INFO.maps) lines.push('🗺 ' + SHOP_INFO.maps);
-    if (SHOP_INFO.phone) lines.push('☎ ' + SHOP_INFO.phone);
+    if (SHOP_INFO.address) lines.push('Address: ' + SHOP_INFO.address);
+    if (SHOP_INFO.maps) lines.push('Map: ' + SHOP_INFO.maps);
+    if (SHOP_INFO.phone) lines.push('Contact: ' + SHOP_INFO.phone);
 
     return lines.join('\n');
   }
@@ -3860,12 +3854,16 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
   // a WhatsApp platform restriction, not something this page controls), so
   // the full itemized receipt — including a link to any reference photo —
   // goes out as the message text via buildReceiptWhatsAppMessage.
-  function openWhatsAppForOrder(order) {
-    if (!order) return;
+  function openWhatsAppTextForOrder(order) {
     const phone = formatPhoneForWhatsApp(order.phoneNumber);
     const message = buildReceiptWhatsAppMessage(order);
     const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
     window.open(url, '_blank');
+  }
+
+  function openWhatsAppForOrder(order) {
+    if (!order) return;
+    openWhatsAppTextForOrder(order);
   }
 
   // Converts each reference photo (a data: URL captured on-device, or an
