@@ -1157,6 +1157,16 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
 .sal-day{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .sal-day.cu::after{content:"";position:absolute;inset:3px;border-radius:50%;border:2px solid rgba(255,255,255,.9);pointer-events:none}
 .sal-day.cu:not(.p):not(.h):not(.a){background:var(--accent);color:#fff}
+.cal-nav b small{display:block;font-size:12px;font-weight:500;color:var(--label-2);text-align:center}
+.cal-nav b{text-align:center}
+.cal-dow span{font-size:10px}
+.cal-grid.m .cal-day{min-height:60px;gap:0;padding:5px 2px}
+.cal-day .bsn{font-size:16px;font-weight:700;line-height:1.1}
+.cal-day .adn{font-size:10px;font-weight:500;opacity:.6;line-height:1.2}
+.cal-day .c0{height:17px}
+.cal-day .wl small{display:block;font-size:11px;opacity:.65;margin-top:1px}
+.cal-grid.w .cal-day .wl{width:112px}
+.cal-legend{font-size:11.5px;color:var(--label-2);margin-top:10px;text-align:center}
 </style>
 
 </head>
@@ -1919,6 +1929,19 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     const bs = adToBs(dt);
     if (!bs) return String(dt.getDate()).padStart(2, '0') + ' ' + AD_MONTH_SHORT[dt.getMonth()] + ' ' + dt.getFullYear();
     return String(bs.d).padStart(2, '0') + ' ' + BS_MONTHS[bs.m] + ' ' + bs.y;
+  }
+  // "28/10/2026" or "05-11-2026" -> "12 Kartik 2083 (28 October 2026)" for WhatsApp text
+  const AD_MONTH_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function waDate(str) {
+    const raw = String(str == null ? '' : str).trim();
+    if (!raw || raw === '-') return raw || '-';
+    const q = raw.split(/[\/-]/);
+    if (q.length !== 3) return raw;
+    const dt = q[0].length === 4 ? new Date(+q[0], +q[1] - 1, +q[2]) : new Date(+q[2], +q[1] - 1, +q[0]);
+    if (isNaN(dt.getTime())) return raw;
+    const ad = dt.getDate() + ' ' + AD_MONTH_FULL[dt.getMonth()] + ' ' + dt.getFullYear();
+    const bs = adToBs(dt);
+    return bs ? bs.d + ' ' + BS_MONTHS[bs.m] + ' ' + bs.y + ' (' + ad + ')' : ad;
   }
   window.formatDateBs = formatDateHuman;
 
@@ -3722,84 +3745,89 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
   // color/measurements/notes, status badges, money summary) but as plain
   // text with WhatsApp's *bold*/_italic_ markup, since that's the "receipt
   // view" the app already shows in the ticket modal and preview.
+  // Shop details printed on WhatsApp receipts. Leave a value '' to hide its line.
+  const SHOP_INFO = { phone: '', address: '', maps: '' };
+
   function buildReceiptWhatsAppMessage(order) {
     const total = Number(order.totalPrice) || 0;
     const advance = Number(order.advancePaid) || 0;
     const balance = Math.max(0, total - advance);
     const isFullyPaid = order.fullyPaid === true || (total > 0 && advance >= total);
     const isDelivered = order.delivered === true;
+    const npr = function (n) { return 'NPR ' + Number(n).toLocaleString('en-IN'); };
+    const LINE = '━━━━━━━━━━━━━━━━';
+    const NUM = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+
+    // Days-left text for the delivery date
+    const due = parseDMY(cleanDeliveryDate(order.deliveryDate), '-');
+    let when = '';
+    if (isDelivered) when = ' · ✅ Delivered';
+    else if (due) {
+      const diff = daysBetween(new Date(), due);
+      when = diff < 0 ? ' · ⚠️ ' + Math.abs(diff) + ' day' + (Math.abs(diff) === 1 ? '' : 's') + ' overdue'
+        : diff === 0 ? ' · today' : diff === 1 ? ' · tomorrow' : ' · in ' + diff + ' days';
+    }
+    // Nepali date in bold, English date in words in italics
+    const fmtDate = function (txt) { return String(txt).replace(/^(.*?) \((.*)\)$/, '*$1* _($2)_'); };
+    const whenLine = when ? (/^ · (✅|⚠️)/.test(when) ? when.slice(3) : '⏳ ' + when.slice(3)) : '';
 
     const lines = [];
-    lines.push('*SARDAR TAILORING*');
+    lines.push('🧵 *SARDAR TAILORING*');
     lines.push('_Bespoke Suit & Tailoring Shop_');
+    lines.push(LINE);
     lines.push('');
-    lines.push('Ticket: *' + order.ticketId + '*');
-    lines.push('Customer: *' + order.customerName + '*');
-    lines.push('Phone: ' + (order.phoneNumber || '-'));
-    if (order.dateSubmitted) lines.push('Order Date: ' + order.dateSubmitted);
-    lines.push('Delivery Date: ' + (order.deliveryDate || '-'));
-
-    const statusBits = [];
-    if (isDelivered) statusBits.push('Delivered ✅');
-    if (isFullyPaid) statusBits.push('Fully Paid ✅');
-    if (statusBits.length) lines.push('Status: ' + statusBits.join('  |  '));
-
+    lines.push('🎫 *' + order.ticketId + '*');
+    lines.push('👤 *' + order.customerName + '*');
+    lines.push('📞 ' + (order.phoneNumber || '-'));
     lines.push('');
-    lines.push('*ITEMS*');
+    if (order.dateSubmitted) { lines.push('📅 *Ordered*'); lines.push(fmtDate(waDate(order.dateSubmitted))); lines.push(''); }
+    lines.push('🚚 *Ready by*');
+    lines.push(fmtDate(waDate(order.deliveryDate)));
+    if (whenLine) lines.push(whenLine);
+    lines.push('');
+    lines.push(LINE);
+    lines.push('👔 *YOUR ITEMS*');
+    lines.push('');
 
-    const itemTypes = order.itemTypes || [];
-    itemTypes.forEach(function (itemType, i) {
-      let measurements = (order.measurementsList && order.measurementsList[i]) || {};
-      if (typeof measurements === 'string') {
-        try { measurements = JSON.parse(measurements); } catch (e) { measurements = { Measurement: measurements }; }
-      }
-      if (measurements && measurements.fields) measurements = measurements.fields;
-
-      const fabric = (order.fabricTypes && order.fabricTypes[i]) || '-';
-      const color = (order.colorDesigns && order.colorDesigns[i]) || '-';
+    (order.itemTypes || []).forEach(function (itemType, i) {
+      let m = (order.measurementsList && order.measurementsList[i]) || {};
+      if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { m = { Measurement: m }; } }
+      if (m && m.fields) m = m.fields;
+      const fabric = (order.fabricTypes && order.fabricTypes[i]) || '';
+      const color = (order.colorDesigns && order.colorDesigns[i]) || '';
       const notes = (order.notesList && order.notesList[i]) || '';
       const photo = (order.referencePhotosList && order.referencePhotosList[i]) || '';
+      const look = [fabric, color].filter(function (x) { return x && x !== '-'; }).join(' · ');
+      const meas = Object.entries(m || {}).filter(function (pr) { return pr[1] !== '' && pr[1] != null; })
+        .map(function (pr) { return pr[0] + ' ' + pr[1]; }).join(' · ');
 
-      lines.push((i + 1) + '. *' + (itemType || 'Unselected') + '*');
-      lines.push('   Fabric: ' + fabric + '  |  Color/Design: ' + color);
-
-      const measureEntries = Object.entries(measurements || {}).filter(function (pair) {
-        return pair[1] !== '' && pair[1] != null;
-      });
-      if (measureEntries.length) {
-        const measureText = measureEntries.map(function (pair) { return pair[0] + ': ' + pair[1]; }).join(', ');
-        lines.push('   Measurements: ' + measureText);
-      }
-      if (notes && notes !== '-') {
-        lines.push('   Notes: ' + notes);
-      }
-      if (photo && photo.indexOf('http') === 0) {
-        lines.push('   Reference Photo: ' + photo);
-      }
+      lines.push((NUM[i] || (i + 1) + '.') + ' *' + (itemType || 'Unselected') + '*');
+      if (look) lines.push('    🧶 ' + look);
+      if (meas) lines.push('    📏 ' + meas);
+      if (notes && notes !== '-') lines.push('    📝 ' + notes);
+      if (photo && photo.indexOf('http') === 0) lines.push('    🖼 ' + photo);
       lines.push('');
     });
 
-    lines.push('Total: NPR ' + total.toLocaleString('en-IN'));
-    lines.push('Advance Paid: NPR ' + advance.toLocaleString('en-IN'));
-    if (isFullyPaid) {
-      lines.push('*Balance Due: NPR 0 (Paid in Full)*');
-    } else {
-      lines.push('*Balance Due: NPR ' + balance.toLocaleString('en-IN') + '*');
-    }
+    // Money table in monospace so the amounts line up
+    const rowsPay = [['Total', npr(total)], ['Advance', npr(advance)], ['Balance', isFullyPaid ? 'NPR 0 (Paid)' : npr(balance)]];
+    const w = Math.max.apply(null, rowsPay.map(function (r) { return r[1].length; }));
+    lines.push(LINE);
+    lines.push('💰 *PAYMENT*');
+    lines.push('```');
+    rowsPay.forEach(function (r) { lines.push((r[0] + '          ').slice(0, 10) + (r[1] + '').padStart(w, ' ')); });
+    lines.push('```');
+    lines.push(isDelivered ? (isFullyPaid ? '✅ *Delivered · Paid in full*' : '✅ *Delivered*') : (isFullyPaid ? '⏳ *In progress · Paid in full*' : '⏳ *In progress*'));
     lines.push('');
 
-    if (isDelivered && isFullyPaid) {
-      lines.push('✅ Your order has been *delivered* and payment has been *received in full*.');
-      lines.push('Thank you for choosing Sardar Tailoring! 🙏');
-    } else if (isDelivered) {
-      lines.push('✅ Your order has been *delivered*. A balance of NPR ' + balance.toLocaleString('en-IN') + ' is still due.');
-      lines.push('Thank you for your order! 🙏');
-    } else if (isFullyPaid) {
-      lines.push('✅ Payment has been *received in full*. We\'ll notify you once your order is ready for delivery.');
-      lines.push('Thank you for your order! 🙏');
-    } else {
-      lines.push('Thank you for your order! 🙏');
-    }
+    if (isDelivered && isFullyPaid) lines.push('🙏 Thank you for choosing Sardar Tailoring!');
+    else if (isDelivered) lines.push('🙏 Thank you! A balance of ' + npr(balance) + ' is still due.');
+    else if (isFullyPaid) lines.push('🙏 Payment received in full. We\'ll message you when your order is ready.');
+    else lines.push('🙏 Thank you for your order! Please show this ticket number when collecting.');
+
+    if (SHOP_INFO.address) lines.push('📍 ' + SHOP_INFO.address);
+    if (SHOP_INFO.maps) lines.push('🗺 ' + SHOP_INFO.maps);
+    if (SHOP_INFO.phone) lines.push('☎ ' + SHOP_INFO.phone);
 
     return lines.join('\n');
   }
@@ -4567,6 +4595,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
   function calLvl(n) { return n >= CAL_BUSY ? 3 : n >= CAL_BUSY - 1 ? 2 : n > 0 ? 1 : 0; }
   function calFmt(d, o) { return d.toLocaleDateString('en-GB', o || { day: 'numeric', month: 'short' }); }
 
+  function calBs(d) { const b = adToBs(d); return b ? { d: b.d, m: BS_MONTHS[b.m], y: b.y } : { d: d.getDate(), m: calFmt(d, { month: 'short' }), y: d.getFullYear() }; }
   window.renderDeliveryCalendar = function (orders) {
     if (orders) calOrders = orders;
     const box = document.getElementById('deliveryCalendar');
@@ -4579,15 +4608,19 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
       (g[k] = g[k] || { p: [], d: [] })[o.delivered ? 'd' : 'p'].push(o);
     });
     const s = calState, a = s.anchor, today = new Date(), days = [];
-    let title;
+    let title, sub;
     if (s.mode === 'month') {
-      const f = new Date(a.getFullYear(), a.getMonth(), 1), n = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
-      for (let i = 0; i < f.getDay(); i++) days.push(null);
-      for (let i = 1; i <= n; i++) days.push(new Date(a.getFullYear(), a.getMonth(), i));
-      title = calFmt(f, { month: 'long', year: 'numeric' });
+      const bs = adToBs(a) || { y: BS_MIN_YEAR, m: 0, d: 1 }, n = bsDaysInMonth(bs.y, bs.m);
+      for (let i = 0; i < bsToAd(bs.y, bs.m, 1).getDay(); i++) days.push(null);
+      for (let i = 1; i <= n; i++) days.push(bsToAd(bs.y, bs.m, i));
+      title = BS_MONTHS[bs.m] + ' ' + bs.y;
+      const f = bsToAd(bs.y, bs.m, 1), l = bsToAd(bs.y, bs.m, n);
+      sub = f.getMonth() === l.getMonth() ? calFmt(f, { month: 'long', year: 'numeric' }) : calFmt(f, { month: 'short' }) + ' \u2013 ' + calFmt(l, { month: 'short', year: 'numeric' });
     } else {
       for (let i = 0; i < 7; i++) days.push(new Date(a.getFullYear(), a.getMonth(), a.getDate() - a.getDay() + i));
-      title = calFmt(days[0]) + ' \u2013 ' + calFmt(days[6]);
+      const x = calBs(days[0]), y = calBs(days[6]);
+      title = x.d + ' ' + x.m + ' \u2013 ' + y.d + ' ' + y.m + ' ' + y.y;
+      sub = calFmt(days[0]) + ' \u2013 ' + calFmt(days[6], { day: 'numeric', month: 'short', year: 'numeric' });
     }
     let total = 0, busiest = null, max = 0;
     days.forEach(function (d) {
@@ -4596,34 +4629,43 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
       total += n;
       if (n > max) { max = n; busiest = d; }
     });
-    const pend = function (d) { return (g[calKey(d)] || { p: [] }).p.length; };
     let cells = '';
     days.forEach(function (d) {
       if (!d) { cells += '<span class="cal-day blank"></span>'; return; }
-      const n = pend(d), cls = 'cal-day l' + calLvl(n) + (calKey(d) === calKey(today) ? ' today' : '') + (calKey(d) === calKey(s.sel) ? ' sel' : '');
-      const lab = calFmt(d, { day: 'numeric', month: 'long' }) + ', ' + n + ' due';
+      const n = (g[calKey(d)] || { p: [] }).p.length, bd = calBs(d);
+      const cls = 'cal-day l' + calLvl(n) + (calKey(d) === calKey(today) ? ' today' : '') + (calKey(d) === calKey(s.sel) ? ' sel' : '');
+      const adTxt = d.getDate() === 1 ? calFmt(d) : String(d.getDate());
+      const lab = bd.d + ' ' + bd.m + ', ' + calFmt(d, { day: 'numeric', month: 'long' }) + ', ' + n + ' due';
       const on = 'onclick="calPick(' + d.getFullYear() + ',' + d.getMonth() + ',' + d.getDate() + ')" aria-label="' + lab + '"';
       cells += s.mode === 'month'
-        ? '<button type="button" class="' + cls + '" ' + on + '><span>' + d.getDate() + '</span>' + (n ? '<span class="c">' + n + '</span>' : '<span></span>') + '</button>'
-        : '<button type="button" class="' + cls + '" ' + on + '><span class="wl">' + calFmt(d, { weekday: 'short', day: 'numeric' }) + '</span><span class="bar"><i style="width:' + Math.min(100, n / CAL_BUSY * 100) + '%"></i></span><span class="c">' + n + '</span></button>';
+        ? '<button type="button" class="' + cls + '" ' + on + '><span class="bsn">' + bd.d + '</span><span class="adn">' + adTxt + '</span>' + (n ? '<span class="c">' + n + '</span>' : '<span class="c0"></span>') + '</button>'
+        : '<button type="button" class="' + cls + '" ' + on + '><span class="wl">' + calFmt(d, { weekday: 'short' }) + ' ' + bd.d + ' ' + bd.m + '<small>' + calFmt(d) + '</small></span><span class="bar"><i style="width:' + Math.min(100, n / CAL_BUSY * 100) + '%"></i></span><span class="c">' + n + '</span></button>';
     });
-    const sg = g[calKey(s.sel)] || { p: [], d: [] };
+    const sg = g[calKey(s.sel)] || { p: [], d: [] }, sb = calBs(s.sel);
     const rows = sg.p.concat(sg.d).map(function (o) {
       return '<div class="cal-o"><div><b>' + escapeHtml(o.customerName) + '</b><small>' + escapeHtml(o.ticketId || '') + ' &middot; ' + (o.itemTypes || []).length + ' pc</small></div>' + (o.delivered ? '<em>Delivered</em>' : '') + '</div>';
     }).join('');
-    const sum = total ? total + ' due' + (max >= CAL_BUSY ? ' &middot; <strong>Busiest ' + calFmt(busiest, { weekday: 'short', day: 'numeric', month: 'short' }) + ' (' + max + ')</strong>' : '') : 'Nothing due in this period';
+    const bz = busiest ? calBs(busiest) : null;
+    const sum = total ? total + ' due' + (max >= CAL_BUSY ? ' &middot; <strong>Busiest ' + bz.d + ' ' + bz.m + ' (' + max + ')</strong>' : '') : 'Nothing due in this period';
     box.innerHTML = '<div class="cal-card"><div class="cal-top"><h3>Delivery calendar</h3><div class="cal-seg"><button type="button" class="' + (s.mode === 'week' ? 'on' : '') + '" onclick="calMode(\'week\')">Week</button><button type="button" class="' + (s.mode === 'month' ? 'on' : '') + '" onclick="calMode(\'month\')">Month</button></div></div>' +
-      '<div class="cal-nav"><button type="button" onclick="calNav(-1)" aria-label="Previous">&lsaquo;</button><b>' + title + '</b><button type="button" class="today" onclick="calToday()">Today</button><button type="button" onclick="calNav(1)" aria-label="Next">&rsaquo;</button></div>' +
+      '<div class="cal-nav"><button type="button" onclick="calNav(-1)" aria-label="Previous">&lsaquo;</button><b>' + title + '<small>' + sub + '</small></b><button type="button" class="today" onclick="calToday()">Today</button><button type="button" onclick="calNav(1)" aria-label="Next">&rsaquo;</button></div>' +
       '<div class="cal-sum">' + sum + '</div>' +
-      (s.mode === 'month' ? '<div class="cal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>' : '') +
+      (s.mode === 'month' ? '<div class="cal-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>' : '') +
       '<div class="cal-grid ' + (s.mode === 'month' ? 'm' : 'w') + (s.dir ? (s.dir > 0 ? ' slide-n' : ' slide-p') : '') + '">' + cells + '</div>' +
-      '<div class="cal-detail"><h4>' + calFmt(s.sel, { weekday: 'long', day: 'numeric', month: 'short' }) + ' &middot; ' + sg.p.length + ' due' + (sg.p.length >= CAL_BUSY ? '<span class="cal-busy">Busy day</span>' : '') + '</h4>' + (rows || '<div class="cal-empty">No deliveries promised for this day.</div>') + '</div></div>';
+      '<div class="cal-legend"><b>Big</b> = Nepali date &middot; <span>small</span> = English date</div>' +
+      '<div class="cal-detail"><h4>' + calFmt(s.sel, { weekday: 'long' }) + ' &middot; ' + sb.d + ' ' + sb.m + ' ' + sb.y + ' <span style="font-weight:500;color:var(--label-2)">(' + calFmt(s.sel, { day: 'numeric', month: 'short', year: 'numeric' }) + ')</span> &middot; ' + sg.p.length + ' due' + (sg.p.length >= CAL_BUSY ? '<span class="cal-busy">Busy day</span>' : '') + '</h4>' + (rows || '<div class="cal-empty">No deliveries promised for this day.</div>') + '</div></div>';
     s.dir = 0;
   };
   window.calMode = function (m) { calState.mode = m; calState.dir = 0; window.renderDeliveryCalendar(); };
   window.calNav = function (dir) {
     const a = calState.anchor;
-    calState.anchor = calState.mode === 'month' ? new Date(a.getFullYear(), a.getMonth() + dir, 1) : new Date(a.getFullYear(), a.getMonth(), a.getDate() + 7 * dir);
+    if (calState.mode === 'month') {
+      const bs = adToBs(a) || { y: BS_MIN_YEAR, m: 0 };
+      let y = bs.y, m = bs.m + dir;
+      if (m > 11) { m = 0; y++; } else if (m < 0) { m = 11; y--; }
+      if (!BS_DATA[y]) return;
+      calState.anchor = bsToAd(y, m, 1);
+    } else calState.anchor = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 7 * dir);
     calState.dir = dir; window.renderDeliveryCalendar();
   };
   window.calToday = function () { calState.anchor = new Date(); calState.sel = new Date(); calState.dir = 0; window.renderDeliveryCalendar(); };
@@ -4919,11 +4961,11 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     lines.push('');
     let statusLine;
     if (diffDays < 0) {
-      statusLine = 'Your order *' + (order.ticketId || '') + '* was due for delivery on ' + (order.deliveryDate || '') + ' and is now ' + Math.abs(diffDays) + ' day(s) overdue.';
+      statusLine = 'Your order *' + (order.ticketId || '') + '* was due for delivery on ' + waDate(order.deliveryDate) + ' and is now ' + Math.abs(diffDays) + ' day(s) overdue.';
     } else if (diffDays === 0) {
-      statusLine = 'Your order *' + (order.ticketId || '') + '* is ready for pickup today (' + (order.deliveryDate || '') + ').';
+      statusLine = 'Your order *' + (order.ticketId || '') + '* is ready for pickup today (' + waDate(order.deliveryDate) + ').';
     } else {
-      statusLine = 'Your order *' + (order.ticketId || '') + '* will be ready for pickup on ' + (order.deliveryDate || '') + (diffDays === 1 ? ' (tomorrow).' : ' (in ' + diffDays + ' days).');
+      statusLine = 'Your order *' + (order.ticketId || '') + '* will be ready for pickup on ' + waDate(order.deliveryDate) + (diffDays === 1 ? ' (tomorrow).' : ' (in ' + diffDays + ' days).');
     }
     lines.push(statusLine);
     lines.push('');
