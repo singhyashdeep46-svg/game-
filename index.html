@@ -4220,6 +4220,7 @@ html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(25
     } else {
       container.innerHTML = generateReceiptHTML(currentOrderMock);
     }
+    setWaNum('preview', currentOrderMock);
   }
 
   // Local Storage Logs Database API
