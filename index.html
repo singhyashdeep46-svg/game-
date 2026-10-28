@@ -1086,6 +1086,77 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
 .order-view div[style] { color: var(--label-2) !important; font-size: 13px !important; }
 .history-card-btn-whatsapp, .history-card-btn-view { font-size: 14.5px; }
 
+
+/* ===== Delivery calendar ===== */
+#deliveryCalendar{margin-bottom:16px}
+.cal-card{background:var(--surface);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-1)}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.cal-top h3{font-size:19px;font-weight:700;letter-spacing:-0.02em}
+.cal-seg{display:inline-flex;background:var(--fill);border-radius:999px;padding:2px}
+.cal-seg button{border:0;background:transparent;color:var(--label-2);font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;transition:background .2s,color .2s}
+.cal-seg button.on{background:var(--surface);color:var(--label);box-shadow:var(--shadow-1)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-nav b{font-size:15px;font-weight:600;letter-spacing:-0.01em}
+.cal-nav button{border:0;background:var(--fill);color:var(--accent);width:36px;height:36px;border-radius:50%;font-size:18px;font-weight:600}
+.cal-nav button.today{width:auto;padding:0 14px;font-size:13px;border-radius:999px}
+.cal-nav button:active{transform:scale(.92)}
+.cal-sum{font-size:13px;color:var(--label-2);margin-bottom:10px}
+.cal-sum strong{color:var(--red-ink);font-weight:600}
+.cal-dow,.cal-grid.m{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow span{text-align:center;font-size:11px;font-weight:600;color:var(--label-3);text-transform:uppercase;letter-spacing:.04em;padding-bottom:4px}
+.cal-grid.w{display:grid;gap:6px}
+.cal-day{position:relative;border:0;background:var(--field);color:var(--label);border-radius:12px;min-height:50px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;font-size:15px;font-weight:500;transition:transform .12s}
+.cal-day:active{transform:scale(.94)}
+.cal-day.blank{background:transparent;pointer-events:none}
+.cal-day .c{font-size:11px;font-weight:700;min-width:20px;padding:1px 6px;border-radius:999px;background:rgba(0,0,0,.08);font-variant-numeric:tabular-nums}
+.cal-day.l1{background:var(--accent-tint)}
+.cal-day.l2{background:rgba(255,149,0,.2)}
+.cal-day.l3{background:var(--red-tint)}
+.cal-day.l3 .c{background:var(--red);color:#fff}
+.cal-day.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.cal-day.sel{background:var(--accent);color:#fff}
+.cal-day.sel .c{background:rgba(255,255,255,.3);color:#fff}
+.cal-grid.w .cal-day{flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 14px;min-height:48px;text-align:left}
+.cal-day .wl{width:58px;font-size:13px;color:inherit;opacity:.75}
+.cal-day .bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.06);overflow:hidden}
+.cal-day .bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.cal-day.l2 .bar i{background:#ff9500}.cal-day.l3 .bar i{background:var(--red)}
+.cal-day.sel .bar{background:rgba(255,255,255,.3)}.cal-day.sel .bar i{background:#fff}
+.cal-grid.slide-n{animation:calN .3s var(--spring)}.cal-grid.slide-p{animation:calP .3s var(--spring)}
+@keyframes calN{from{opacity:0;transform:translateX(24px)}}
+@keyframes calP{from{opacity:0;transform:translateX(-24px)}}
+.cal-detail{margin-top:14px;border-top:.5px solid var(--sep);padding-top:12px}
+.cal-detail h4{font-size:15px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-busy{font-size:12px;font-weight:600;color:var(--red-ink);background:var(--red-tint);padding:2px 9px;border-radius:999px}
+.cal-o{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--field);border-radius:12px;margin-bottom:6px}
+.cal-o b{font-size:15px;font-weight:600}.cal-o small{display:block;font-size:12px;color:var(--label-2)}
+.cal-o em{font-style:normal;font-size:12px;font-weight:600;color:var(--green-ink);background:var(--green-tint);padding:2px 9px;border-radius:999px}
+.cal-empty{font-size:14px;color:var(--label-2);padding:6px 2px}
+html.dark-mode .cal-day .c,html.dark-mode .cal-day .bar{background:rgba(255,255,255,.12)}
+/* ===== Swipe actions ===== */
+.swipe-row{position:relative;border-radius:var(--r-lg);margin-bottom:12px}
+.swipe-row>.history-card{position:relative;margin-bottom:0;touch-action:pan-y;animation-fill-mode:backwards;will-change:transform}
+.swipe-bg{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.swipe-bg>div{position:absolute;inset:0;display:flex;align-items:center;gap:8px;padding:0 24px;font-size:15px;font-weight:600;color:#fff;opacity:0}
+.sw-l{background:var(--green)}.sw-r{background:var(--red);justify-content:flex-end}
+.swipe-row[data-dir=r] .sw-l,.swipe-row[data-dir=l] .sw-r{opacity:1}
+.swipe-bg svg{width:22px;height:22px;transform:scale(calc(.6 + var(--p,0) * .4));transition:transform .18s var(--spring)}
+.swipe-row.armed .swipe-bg svg{transform:scale(1.25)}
+#historyListContainer{overflow-x:clip}
+/* ===== Skeleton loading ===== */
+.skel-wrap{display:contents}
+.skel-card{display:flex;flex-direction:column;gap:12px;background:var(--surface);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-1)}
+.skel-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.skel-col{display:flex;flex-direction:column;gap:8px;flex:1}
+.skel{display:block;background:var(--fill);border-radius:8px;position:relative;overflow:hidden}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:skelsweep 1.4s ease-in-out infinite}
+html.dark-mode .skel::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+@keyframes skelsweep{to{transform:translateX(100%)}}
+.skel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}.skel-grid .skel-card{margin:0}
+.skel-note{grid-column:1/-1;text-align:center;font-size:13px;color:var(--label-2);padding:2px 0 8px}
+@media (prefers-reduced-motion:reduce){.skel::after{display:none}.cal-grid.slide-n,.cal-grid.slide-p{animation:none}.swipe-bg svg{transition:none}}
+.sal-day{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.sal-day.cu::after{content:"";position:absolute;inset:3px;border-radius:50%;border:2px solid rgba(255,255,255,.9);pointer-events:none}
+.sal-day.cu:not(.p):not(.h):not(.a){background:var(--accent);color:#fff}
 </style>
 
 </head>
@@ -1296,6 +1367,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
       <h2>Dashboard</h2>
     </div>
     <div id="dashSalaryCard"></div>
+    <div id="deliveryCalendar"></div>
     <div id="dashboardContent">
       <div class="dashboard-empty">Loading dashboard&hellip;</div>
     </div>
@@ -1950,7 +2022,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
   // Advances are deducted from what is earned. Stored on this device.
   // =====================================================================
   const SAL_KEY = 'sardarStaffSalary';
-  let salData = { staff: [], advances: [], paid: {}, att: {}, updatedAt: 0 };
+  let salData = { staff: [], advances: [], paid: {}, att: {}, dr: {}, updatedAt: 0 };
   let salViewYear = null, salViewMonth = null;   // BS month being viewed
   let salOpenForm = null;                         // staff id with advance form open
   let salOpenAtt = null;                          // staff id with attendance grid open
@@ -1961,7 +2033,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
       const raw = localStorage.getItem(SAL_KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        salData = { staff: p.staff || [], advances: p.advances || [], paid: p.paid || {}, att: p.att || {}, updatedAt: Number(p.updatedAt) || 0 };
+        salData = { staff: p.staff || [], advances: p.advances || [], paid: p.paid || {}, att: p.att || {}, dr: p.dr || {}, updatedAt: Number(p.updatedAt) || 0 };
       }
     } catch (e) {}
   }
@@ -1982,7 +2054,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     const rows = [];
     salData.staff.forEach(function (st) {
       const keys = {};
-      [salData.att, salData.paid].forEach(function (o) {
+      [salData.att, salData.paid, salData.dr].forEach(function (o) {
         Object.keys(o).forEach(function (k) { if (k.indexOf(st.id + '|') === 0) keys[k.split('|')[1]] = 1; });
       });
       salData.advances.forEach(function (a) {
@@ -2022,7 +2094,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
         if (!res || !res.ok) throw new Error((res && res.error) || 'Salary script not set up');
         const rt = Number(res.updatedAt) || 0, rd = res.data;
         if (rd && rt > (salData.updatedAt || 0)) {
-          salData = { staff: rd.staff || [], advances: rd.advances || [], paid: rd.paid || {}, att: rd.att || {}, updatedAt: rt };
+          salData = { staff: rd.staff || [], advances: rd.advances || [], paid: rd.paid || {}, att: rd.att || {}, dr: rd.dr || {}, updatedAt: rt };
           try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
           salRender(); salSetStatus('ok', 'Synced to Google Sheet');
         } else if (salData.staff.length && ((salData.updatedAt || 0) > rt || rt === 0)) {
@@ -2065,8 +2137,12 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     const attMap = salData.att[st.id + '|' + salKey(y, m)] || {};
     const days = Object.keys(attMap).reduce(function (t, d) { return t + attMap[d]; }, 0);
     const rate = salRate(st, y, m);
-    const earned = salIsDaily(st) ? rate * days : rate;
-    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, earned: earned, net: earned - advTotal,
+    const drMap = (salIsDaily(st) && salData.dr[st.id + '|' + salKey(y, m)]) || {};
+    const customDays = Object.keys(drMap).map(Number).sort(function (a, b) { return a - b; });
+    const custom = customDays.reduce(function (t, d) { return t + (Number(drMap[d]) || 0); }, 0);
+    const regDays = Object.keys(attMap).reduce(function (t, d) { return Object.prototype.hasOwnProperty.call(drMap, d) ? t : t + attMap[d]; }, 0);
+    const earned = salIsDaily(st) ? rate * regDays + custom : rate;
+    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, regDays: regDays, drMap: drMap, customDays: customDays, custom: custom, earned: earned, net: earned - advTotal,
              paid: salData.paid[st.id + '|' + salKey(y, m)] || null };
   }
 
@@ -2139,7 +2215,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
       if (!ok) return;
       salData.staff = salData.staff.filter(function (x) { return x.id !== id; });
       salData.advances = salData.advances.filter(function (a) { return a.staffId !== id; });
-      [salData.paid, salData.att].forEach(function (o) {
+      [salData.paid, salData.att, salData.dr].forEach(function (o) {
         Object.keys(o).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete o[k]; });
       });
       salSave(); salRender();
@@ -2158,7 +2234,24 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
   };
 
   // none -> full day -> half day -> none
+  window.salCustomDay = function (id, day) {
+    const st = salData.staff.find(function (x) { return x.id === id; });
+    if (!st || !salIsDaily(st)) return;
+    const key = id + '|' + salKey(salViewYear, salViewMonth), map = salData.dr[key] || {};
+    const has = Object.prototype.hasOwnProperty.call(map, day);
+    const v = window.prompt('Wage for ' + st.name + ' on ' + day + ' ' + BS_MONTHS[salViewMonth] + ' (NPR).\nThis replaces the normal ' + salNpr(salRate(st, salViewYear, salViewMonth)) + ' for this day only. Leave empty to remove:', has ? map[day] : salRate(st, salViewYear, salViewMonth));
+    if (v === null) return;
+    if (v.trim() === '') { if (has) delete map[day]; }
+    else {
+      const n = Number(v);
+      if (isNaN(n) || n < 0) { appAlert('Enter a valid amount.'); return; }
+      map[day] = n;
+    }
+    if (Object.keys(map).length) salData.dr[key] = map; else delete salData.dr[key];
+    salSave(); salRender();
+  };
   window.salTapDay = function (id, day) {
+    if (window._salLP && Date.now() - window._salLP < 700) return; // long-press just opened the custom wage
     const key = id + '|' + salKey(salViewYear, salViewMonth);
     const map = salData.att[key] || (salData.att[key] = {});
     const cur = map[day] || 0;
@@ -2190,7 +2283,11 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     L.push('Month: ' + BS_MONTHS[salViewMonth] + ' ' + salViewYear);
     L.push('');
     L.push('Attendance: ' + cp + ' present, ' + ch + ' half, ' + ca + ' absent');
-    L.push(daily ? 'Earned: ' + c.days + ' days x ' + salNpr(salRate(st, salViewYear, salViewMonth)) + ' = ' + salNpr(c.earned) : 'Salary: ' + salNpr(c.earned));
+    if (daily) {
+      L.push('Regular: ' + c.regDays + ' days x ' + salNpr(salRate(st, salViewYear, salViewMonth)) + ' = ' + salNpr(c.regDays * salRate(st, salViewYear, salViewMonth)));
+      c.customDays.forEach(function (d) { L.push('Day ' + d + ' (custom): ' + salNpr(c.drMap[d])); });
+      L.push('Earned: ' + salNpr(c.earned));
+    } else L.push('Salary: ' + salNpr(c.earned));
     if (c.advs.length) {
       L.push('');
       L.push('Advances:');
@@ -2213,6 +2310,20 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     salData.att[key] = map;
     salSave(); salRender();
   };
+
+  (function () {
+    let t = null, sx = 0, sy = 0;
+    const clr = function () { clearTimeout(t); t = null; };
+    document.addEventListener('pointerdown', function (e) {
+      const b = e.target.closest && e.target.closest('.sal-day[data-sid]');
+      if (!b) return;
+      sx = e.clientX; sy = e.clientY;
+      t = setTimeout(function () { t = null; window._salLP = Date.now(); if (navigator.vibrate) navigator.vibrate(10); window.salCustomDay(b.dataset.sid, Number(b.dataset.day)); }, 550);
+    });
+    document.addEventListener('pointermove', function (e) { if (t && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) clr(); });
+    ['pointerup', 'pointercancel'].forEach(function (n) { document.addEventListener(n, clr); });
+    document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.sal-day')) e.preventDefault(); });
+  })();
 
   window.salClearAtt = function (id) {
     delete salData.att[id + '|' + salKey(salViewYear, salViewMonth)];
@@ -2268,10 +2379,10 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     for (let i = 0; i < firstWd; i++) h += '<button type="button" class="sal-day empty" disabled></button>';
     for (let d = 1; d <= dim; d++) {
       const v = c.attMap[d] || 0;
-      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '');
-      h += '<button type="button" class="' + cls + '" onclick="salTapDay(\'' + st.id + '\',' + d + ')">' + d + '</button>';
+      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '') + (Object.prototype.hasOwnProperty.call(c.drMap, d) ? ' cu' : '');
+      h += '<button type="button" class="' + cls + '" data-sid="' + st.id + '" data-day="' + d + '"' + (Object.prototype.hasOwnProperty.call(c.drMap, d) ? ' title="Custom wage ' + salNpr(c.drMap[d]) + '"' : '') + ' onclick="salTapDay(\'' + st.id + '\',' + d + ')">' + d + '</button>';
     }
-    h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span><i style="background:rgba(225,29,63,.35)"></i>Absent</span><span>Tap a day to change</span></div>' +
+    h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span><i style="background:rgba(225,29,63,.35)"></i>Absent</span><span><i style="background:var(--brand-purple-deep);outline:2px solid #fff;outline-offset:-4px"></i>Custom wage (hold a day)</span><span>Tap a day to change</span></div>' +
       '<div class="sal-actions"><button type="button" class="history-card-btn-view" onclick="salAllPresent(\'' + st.id + '\')">All Present (except Sat)</button>' +
       '<button type="button" class="history-card-btn-delete" onclick="salClearAtt(\'' + st.id + '\')">Clear</button></div>';
     return h;
@@ -2311,7 +2422,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
           (daily ? '' : '<div class="sal-note" style="text-align:left;margin-top:8px">Monthly staff: attendance is for records, salary stays fixed.</div>') +
         '</div>' +
         '<div class="sal-block"><div class="sal-block-head"><span>This month</span></div><div class="sal-rows">' +
-          (daily ? '<div class="sal-row"><span>Days worked</span><b>' + c.days + ' &times; ' + salNpr(salRate(st, salViewYear, salViewMonth)) + '</b></div>' : '') +
+          (daily ? '<div class="sal-row"><span>Days worked</span><b>' + c.regDays + ' &times; ' + salNpr(salRate(st, salViewYear, salViewMonth)) + '</b></div>' + (c.customDays.length ? '<div class="sal-row"><span>Custom-wage days (' + c.customDays.length + ')</span><b>' + salNpr(c.custom) + '</b></div>' : '') : '') +
           '<div class="sal-row"><span>' + (daily ? 'Earned' : 'Salary') + '</span><b>' + salNpr(c.earned) + '</b></div>' +
           '<div class="sal-row neg"><span>Advance taken</span><b>- ' + salNpr(c.advTotal) + '</b></div>' +
           '<div class="sal-row net"><span>' + (c.net < 0 ? 'Over-advanced' : 'Balance to pay') + '</span><b' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</b></div>' +
@@ -2377,6 +2488,10 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
       const parts = k.split('|'), map = salData.att[k];
       const days = Object.keys(map).reduce(function (t, d) { return t + map[d]; }, 0);
       rows.push(['Attendance (' + parts[1] + ' BS)', nameOf(parts[0]), 'Daily', '', '', days, 'days worked']);
+    });
+    Object.keys(salData.dr).forEach(function (k) {
+      const parts = k.split('|'), map = salData.dr[k];
+      Object.keys(map).forEach(function (d) { rows.push(['Custom Day Wage (' + parts[1] + ' BS)', nameOf(parts[0]), 'Daily', '', '', map[d], 'day ' + d]); });
     });
     salData.advances.slice().sort(function (a, b) { return a.iso < b.iso ? -1 : 1; }).forEach(function (a) {
       rows.push(['Advance', nameOf(a.staffId), '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
@@ -4126,11 +4241,11 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     }
   }
 
-  window.markDelivered = function(index) {
+  window.markDelivered = function(index, skipConfirm) {
     const order = renderedHistory[index];
     if (!order) return;
 
-    appConfirm('Mark this order as Delivered?').then(function (confirmed) {
+    (skipConfirm ? Promise.resolve(true) : appConfirm('Mark this order as Delivered?')).then(function (confirmed) {
       if (!confirmed) return;
 
       if (renderedHistoryIsOffline) {
@@ -4358,12 +4473,12 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     if (_cachedNow.length) {
       allHistoryOrders = _cachedNow; renderedHistoryIsOffline = false; filterHistoryList();
     } else {
-      listContainer.innerHTML = inlineLoadingMarkup('Loading orders from Google Sheets&hellip;');
+      listContainer.innerHTML = skeletonHistory();
     }
 
     const slowNoticeTimer = setTimeout(function () {
-      if (listContainer.querySelector('.inline-loading')) {
-        listContainer.innerHTML = inlineLoadingMarkup('Still loading &mdash; first request after a while can take a bit longer&hellip;');
+      if (listContainer.querySelector('.skel-card')) {
+        listContainer.innerHTML = skeletonHistory('Still loading &mdash; first request after a while can take a bit longer&hellip;');
       }
     }, 6000);
 
@@ -4429,16 +4544,171 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
     return Math.round((b0 - a0) / MS_DAY);
   }
 
+
+  // ---- Skeleton loading ----
+  function skelCard() {
+    return '<div class="skel-card"><div class="skel-row"><div class="skel-col"><i class="skel" style="width:46%;height:18px"></i><i class="skel" style="width:30%;height:13px"></i></div><i class="skel" style="width:64px;height:22px;border-radius:999px"></i></div><div class="skel-row" style="justify-content:flex-start"><i class="skel" style="width:88px;height:26px;border-radius:999px"></i><i class="skel" style="width:72px;height:26px;border-radius:999px"></i></div><i class="skel" style="width:100%;height:54px;border-radius:12px"></i><i class="skel" style="width:100%;height:44px;border-radius:12px"></i></div>';
+  }
+  function skeletonHistory(note) {
+    let h = '<div class="skel-wrap" role="status" aria-busy="true" aria-label="Loading orders">';
+    for (let i = 0; i < 4; i++) h += skelCard();
+    return h + (note ? '<div class="skel-note">' + note + '</div>' : '') + '</div>';
+  }
+  function skeletonDashboard(note) {
+    const t = '<div class="skel-card" style="gap:10px"><i class="skel" style="width:40%;height:13px"></i><i class="skel" style="width:60%;height:26px"></i></div>';
+    return '<div role="status" aria-busy="true" aria-label="Loading dashboard"><div class="skel-grid">' + t + t + t + t + '</div>' + skelCard() + (note ? '<div class="skel-note">' + note + '</div>' : '') + '</div>';
+  }
+
+  // ---- Delivery calendar ----
+  const CAL_BUSY = 4; // pending deliveries on one day that count as "busy"
+  const calState = { mode: 'month', anchor: new Date(), sel: new Date() };
+  let calOrders = [];
+  function calKey(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function calLvl(n) { return n >= CAL_BUSY ? 3 : n >= CAL_BUSY - 1 ? 2 : n > 0 ? 1 : 0; }
+  function calFmt(d, o) { return d.toLocaleDateString('en-GB', o || { day: 'numeric', month: 'short' }); }
+
+  window.renderDeliveryCalendar = function (orders) {
+    if (orders) calOrders = orders;
+    const box = document.getElementById('deliveryCalendar');
+    if (!box) return;
+    const g = {};
+    calOrders.forEach(function (o) {
+      const d = parseDMY(cleanDeliveryDate(o.deliveryDate), '-');
+      if (!d) return;
+      const k = calKey(d);
+      (g[k] = g[k] || { p: [], d: [] })[o.delivered ? 'd' : 'p'].push(o);
+    });
+    const s = calState, a = s.anchor, today = new Date(), days = [];
+    let title;
+    if (s.mode === 'month') {
+      const f = new Date(a.getFullYear(), a.getMonth(), 1), n = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
+      for (let i = 0; i < f.getDay(); i++) days.push(null);
+      for (let i = 1; i <= n; i++) days.push(new Date(a.getFullYear(), a.getMonth(), i));
+      title = calFmt(f, { month: 'long', year: 'numeric' });
+    } else {
+      for (let i = 0; i < 7; i++) days.push(new Date(a.getFullYear(), a.getMonth(), a.getDate() - a.getDay() + i));
+      title = calFmt(days[0]) + ' \u2013 ' + calFmt(days[6]);
+    }
+    let total = 0, busiest = null, max = 0;
+    days.forEach(function (d) {
+      if (!d) return;
+      const n = (g[calKey(d)] || { p: [] }).p.length;
+      total += n;
+      if (n > max) { max = n; busiest = d; }
+    });
+    const pend = function (d) { return (g[calKey(d)] || { p: [] }).p.length; };
+    let cells = '';
+    days.forEach(function (d) {
+      if (!d) { cells += '<span class="cal-day blank"></span>'; return; }
+      const n = pend(d), cls = 'cal-day l' + calLvl(n) + (calKey(d) === calKey(today) ? ' today' : '') + (calKey(d) === calKey(s.sel) ? ' sel' : '');
+      const lab = calFmt(d, { day: 'numeric', month: 'long' }) + ', ' + n + ' due';
+      const on = 'onclick="calPick(' + d.getFullYear() + ',' + d.getMonth() + ',' + d.getDate() + ')" aria-label="' + lab + '"';
+      cells += s.mode === 'month'
+        ? '<button type="button" class="' + cls + '" ' + on + '><span>' + d.getDate() + '</span>' + (n ? '<span class="c">' + n + '</span>' : '<span></span>') + '</button>'
+        : '<button type="button" class="' + cls + '" ' + on + '><span class="wl">' + calFmt(d, { weekday: 'short', day: 'numeric' }) + '</span><span class="bar"><i style="width:' + Math.min(100, n / CAL_BUSY * 100) + '%"></i></span><span class="c">' + n + '</span></button>';
+    });
+    const sg = g[calKey(s.sel)] || { p: [], d: [] };
+    const rows = sg.p.concat(sg.d).map(function (o) {
+      return '<div class="cal-o"><div><b>' + escapeHtml(o.customerName) + '</b><small>' + escapeHtml(o.ticketId || '') + ' &middot; ' + (o.itemTypes || []).length + ' pc</small></div>' + (o.delivered ? '<em>Delivered</em>' : '') + '</div>';
+    }).join('');
+    const sum = total ? total + ' due' + (max >= CAL_BUSY ? ' &middot; <strong>Busiest ' + calFmt(busiest, { weekday: 'short', day: 'numeric', month: 'short' }) + ' (' + max + ')</strong>' : '') : 'Nothing due in this period';
+    box.innerHTML = '<div class="cal-card"><div class="cal-top"><h3>Delivery calendar</h3><div class="cal-seg"><button type="button" class="' + (s.mode === 'week' ? 'on' : '') + '" onclick="calMode(\'week\')">Week</button><button type="button" class="' + (s.mode === 'month' ? 'on' : '') + '" onclick="calMode(\'month\')">Month</button></div></div>' +
+      '<div class="cal-nav"><button type="button" onclick="calNav(-1)" aria-label="Previous">&lsaquo;</button><b>' + title + '</b><button type="button" class="today" onclick="calToday()">Today</button><button type="button" onclick="calNav(1)" aria-label="Next">&rsaquo;</button></div>' +
+      '<div class="cal-sum">' + sum + '</div>' +
+      (s.mode === 'month' ? '<div class="cal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>' : '') +
+      '<div class="cal-grid ' + (s.mode === 'month' ? 'm' : 'w') + (s.dir ? (s.dir > 0 ? ' slide-n' : ' slide-p') : '') + '">' + cells + '</div>' +
+      '<div class="cal-detail"><h4>' + calFmt(s.sel, { weekday: 'long', day: 'numeric', month: 'short' }) + ' &middot; ' + sg.p.length + ' due' + (sg.p.length >= CAL_BUSY ? '<span class="cal-busy">Busy day</span>' : '') + '</h4>' + (rows || '<div class="cal-empty">No deliveries promised for this day.</div>') + '</div></div>';
+    s.dir = 0;
+  };
+  window.calMode = function (m) { calState.mode = m; calState.dir = 0; window.renderDeliveryCalendar(); };
+  window.calNav = function (dir) {
+    const a = calState.anchor;
+    calState.anchor = calState.mode === 'month' ? new Date(a.getFullYear(), a.getMonth() + dir, 1) : new Date(a.getFullYear(), a.getMonth(), a.getDate() + 7 * dir);
+    calState.dir = dir; window.renderDeliveryCalendar();
+  };
+  window.calToday = function () { calState.anchor = new Date(); calState.sel = new Date(); calState.dir = 0; window.renderDeliveryCalendar(); };
+  window.calPick = function (y, m, d) { calState.sel = new Date(y, m, d); calState.dir = 0; window.renderDeliveryCalendar(); };
+
+  // ---- Swipe actions on History cards (right = delivered, left = delete) ----
+  (function () {
+    const list = document.getElementById('historyListContainer');
+    if (!list) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const TH = 96, MAX = 150;
+    let st = null;
+    function rubber(d) { const a = Math.abs(d); if (a <= TH) return d; const r = Math.min(TH + (a - TH) * 0.25, MAX); return d < 0 ? -r : r; }
+    function setX(card, x) {
+      card._x = x;
+      card.style.transform = x ? 'translate3d(' + x + 'px,0,0)' : '';
+      const row = card.parentNode, armed = Math.abs(x) >= TH;
+      row.style.setProperty('--p', Math.min(Math.abs(x) / TH, 1));
+      row.dataset.dir = x > 0 ? 'r' : x < 0 ? 'l' : '';
+      if (armed !== row.classList.contains('armed')) { row.classList.toggle('armed', armed); if (armed && navigator.vibrate) navigator.vibrate(8); }
+    }
+    // Critically-tuned spring (damping 0.8, response 0.35s) that inherits release velocity
+    function spring(card, v) {
+      cancelAnimationFrame(card._raf);
+      if (reduce.matches) { setX(card, 0); return; }
+      const k = Math.pow(2 * Math.PI / 0.35, 2), c = 2 * 0.8 * Math.sqrt(k);
+      let x = card._x || 0, last = performance.now();
+      (function tick(now) {
+        const dt = Math.min((now - last) / 1000, 0.032); last = now;
+        v += (-k * x - c * v) * dt; x += v * dt; setX(card, x);
+        if (Math.abs(x) < 0.3 && Math.abs(v) < 5) { setX(card, 0); return; }
+        card._raf = requestAnimationFrame(tick);
+      })(last);
+    }
+    list.addEventListener('pointerdown', function (e) {
+      const card = e.target.closest('.swipe-row > .history-card');
+      if (!card) return;
+      cancelAnimationFrame(card._raf); // grab mid-flight: continue from the live position
+      st = { card: card, row: card.parentNode, id: e.pointerId, x0: e.clientX, y0: e.clientY, base: card._x || 0, lock: null, hist: [{ t: e.timeStamp, x: e.clientX }] };
+    });
+    list.addEventListener('pointermove', function (e) {
+      if (!st || e.pointerId !== st.id) return;
+      const dx = e.clientX - st.x0, dy = e.clientY - st.y0;
+      if (st.lock === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        st.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        if (st.lock === 'x') { try { st.card.setPointerCapture(e.pointerId); } catch (_) {} }
+      }
+      if (st.lock !== 'x') return;
+      st.hist.push({ t: e.timeStamp, x: e.clientX }); if (st.hist.length > 5) st.hist.shift();
+      let d = st.base + dx;
+      if (d > 0 && st.row.dataset.done === '1') d = Math.min(d * 0.25, 24); // already delivered: resist
+      setX(st.card, rubber(d));
+    });
+    function end(e) {
+      if (!st || e.pointerId !== st.id) return;
+      const s = st; st = null;
+      if (s.lock !== 'x') return;
+      s.card._dragged = true; setTimeout(function () { s.card._dragged = false; }, 60);
+      const h = s.hist, f = h[0], l = h[h.length - 1];
+      const v = l.t > f.t ? (l.x - f.x) / (l.t - f.t) * 1000 : 0;
+      const proj = s.card._x + v * 0.15, idx = +s.row.dataset.index, done = s.row.dataset.done === '1';
+      spring(s.card, v);
+      if (e.type === 'pointercancel') return;
+      if (proj >= TH && !done) window.markDelivered(idx, true);
+      else if (proj <= -TH) window.deleteHistoryTicket(idx);
+    }
+    list.addEventListener('pointerup', end);
+    list.addEventListener('pointercancel', end);
+    list.addEventListener('click', function (e) {
+      const c = e.target.closest('.history-card');
+      if (c && c._dragged) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  })();
+
   function renderDashboard() {
     const content = document.getElementById('dashboardContent');
     if (window.salRenderDashCard) window.salRenderDashCard();
     const _cachedDash = getFallbackHistory();
     if (_cachedDash.length) buildDashboard(_cachedDash, false);
-    else content.innerHTML = inlineLoadingMarkup('Loading dashboard&hellip;');
+    else content.innerHTML = skeletonDashboard();
 
     const slowNoticeTimer = setTimeout(function () {
-      if (content.querySelector('.inline-loading')) {
-        content.innerHTML = inlineLoadingMarkup('Still loading &mdash; first request after a while can take a bit longer&hellip;');
+      if (content.querySelector('.skel-card')) {
+        content.innerHTML = skeletonDashboard('Still loading &mdash; first request after a while can take a bit longer&hellip;');
       }
     }, 6000);
 
@@ -4450,6 +4720,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
   function buildDashboard(orders, offline) {
     const content = document.getElementById('dashboardContent');
     orders = Array.isArray(orders) ? orders : [];
+    window.renderDeliveryCalendar(orders);
 
     if (!orders.length) {
       content.innerHTML = '<div class="dashboard-empty">No orders yet — submit your first order to see stats here.</div>';
@@ -5057,6 +5328,11 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
       if (order.totalPrice > 0 && order.advancePaid >= order.totalPrice) order.fullyPaid = true;
 
       html += `
+        <div class="swipe-row" data-index="${index}" data-done="${order.delivered ? 1 : 0}">
+        <div class="swipe-bg" aria-hidden="true">
+          <div class="sw-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Delivered</div>
+          <div class="sw-r">Delete<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></div>
+        </div>
         <div class="history-card" style="--card-delay:${cardDelay}">
           <div class="history-card-header">
             <div class="history-card-cust">
@@ -5110,6 +5386,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
               <svg viewBox="0 0 24 24" fill="currentColor"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg>
             </button>
           </div>
+        </div>
         </div>
       `;
     });
